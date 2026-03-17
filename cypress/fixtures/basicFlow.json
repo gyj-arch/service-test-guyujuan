@@ -1,0 +1,13 @@
+{
+  "service": {
+    "name": "httpbin-service",
+    "url": "http://httpbin.org"
+  },
+  "route": {
+    "name": "httpbin-route",
+    "path": "/httpbin",
+    "method": "GET",
+    "service": "httpbin-service",
+    "tags": "httpbin tag01"
+  }
+}

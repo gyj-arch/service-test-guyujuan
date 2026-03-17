@@ -1,0 +1,77 @@
+name: Simplified Cross-Browser Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, edge]
+    
+    name: Cypress run on ${{ matrix.browser }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Start Docker services
+        run: |
+          cd docker
+          docker compose up -d
+          echo "Waiting for Kong to be ready..."
+          timeout 120 bash -c 'until curl -f http://localhost:8001/status; do sleep 2; done'
+
+      - name: Run Cypress on ${{ matrix.browser }}
+        uses: cypress-io/github-action@v6
+        with:
+          browser: ${{ matrix.browser }}
+          install: false
+        continue-on-error: true
+      
+      - name: Stop Docker services
+        if: always()
+        run: |
+          cd docker
+          docker compose down
+     
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.browser }}
+          path: cypress/reports
+          if-no-files-found: warn
+          retention-days: 14 
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.browser }}
+          path: cypress/screenshots
+          if-no-files-found: warn
+          retention-days: 14 
+      
+      - name: Upload videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-${{ matrix.browser }}
+          path: cypress/videos
+          if-no-files-found: ignore
+          retention-days: 7 
