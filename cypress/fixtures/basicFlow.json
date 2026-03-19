@@ -1,13 +1,19 @@
 {
   "service": {
     "name": "httpbin-service",
-    "url": "http://httpbin.org"
+    "url": "http://httpbin.org",
+    "host": "httpbin.org",
+    "path": "/",
+    "port": 80
   },
   "route": {
     "name": "httpbin-route",
+    "service": "httpbin-service",
     "path": "/httpbin",
     "method": "GET",
-    "service": "httpbin-service",
-    "tags": "httpbin tag01"
+    "stripPath": "true",
+    "host": "api.example.com",
+    "tags": "httpbin tag01",
+    "protocol": "http,https"
   }
 }

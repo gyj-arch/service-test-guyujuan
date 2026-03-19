@@ -5,7 +5,7 @@ import { recurse } from 'cypress-recurse'
 describe('Add Service and Route and then delete them', () => {
   const gatewayServiceBusiness = new GatewayServiceBusiness()
   const routeBusiness = new RouteBusiness()
-  const unique = `${Date.now()}`
+  const unique = `${Date.now()}-${Math.random().toString().slice(2, 6)}`;
   let serviceConfig;
   let routeConfig;
   let serverConfig;
@@ -77,14 +77,14 @@ describe('Add Service and Route and then delete them', () => {
   })
 
   it('add a gateway service', () => {
-    gatewayServiceBusiness.createGatewayService(serviceConfig).getServiceId().then((id) => {
+    gatewayServiceBusiness.createGatewayServiceWithFullURL(serviceConfig).getServiceId().then((id) => {
       serviceId = id;
       cy.log(`Created gateway service with ID: ${serviceId}`);
     });
   })
 
   it('add a route', () => {
-    routeId = routeBusiness.createRoute(routeConfig).getRouteId().then((id) => {
+    routeId = routeBusiness.createBasicRoute(routeConfig).getRouteId().then((id) => {
       routeId = id;
       cy.log(`Created route with ID: ${routeId}`);
     });

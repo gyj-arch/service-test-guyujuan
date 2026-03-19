@@ -4,5 +4,7 @@
     "serverPort":8000,
     "adminPort":8001,
     "protocol":"http",
-    "workspace":"default"
+    "workspace":"default",
+    "serverBaseURL":"http://localhost:8002",
+    "adminURL":"http://localhost:8001"
 }
