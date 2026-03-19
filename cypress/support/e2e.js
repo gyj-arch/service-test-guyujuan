@@ -29,3 +29,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   // Let all other exceptions fail the test normally (to preserve test integrity)
   return true;
 });
+
+// Define and expose to global scope
+globalThis.generateRandomId = () => `${Date.now()}-${Math.random().toString().slice(2, 6)}`;
+globalThis.generateUUID = () => crypto.randomUUID().replace(/-/g, '').substring(0, 8);

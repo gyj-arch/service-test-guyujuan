@@ -14,19 +14,6 @@ class RouteMainPage {
         this.deleteConfirmButtonSelector = 'button[data-testid="modal-action-button"]'
     }
 
-    get pageTitleElement() {
-        return cy.get(this.pageTitleSelector).contains('Routes');
-    }
-
-    get pageDescriptionElement() {
-        return cy.get(this.pageDescriptionSelector).contains('A Route defines rules to match client requests');
-    }
-
-    get newRouteButton() {
-        return cy.get(this.newRouteButtonSelector)
-            .contains('New route');
-    }
-
     navigateToRouteMainPage() {
         cy.fixture('kongManager.json').then((server) => {
             const routeMainPageURL = `${server.protocol}://${server.host}:${server.port}/${server.workspace}/routes`;
@@ -36,20 +23,34 @@ class RouteMainPage {
     }
 
     waitPageLoaded() {
-        this.pageTitleElement.should('be.visible');
-        this.pageDescriptionElement.should('be.visible');
-        this.newRouteButton.should('be.visible');
+        cy.get(this.pageTitleSelector).should('be.visible');
+        cy.get(this.pageDescriptionSelector).should('be.visible');
+        cy.get(this.newRouteButtonSelector).should('be.visible');
         return this;
     }
 
     clickNewRoute() {
-        this.newRouteButton.click();
+        cy.get(this.newRouteButtonSelector).click();
         return new RouteNewPage();
     }
 
     getRouteRowByName(routeName) {
         return cy.get(this.routeTableRowSelector)
             .filter(`[data-testid="${routeName}"]`);
+    }
+
+    shouldHaveRoute(routeName){
+        cy.get(this.routeTableSelector)
+            .find(`tbody tr[data-testid="${routeName}"]`)
+            .should('have.length', 1);
+        return this;
+    }
+
+    shouldNotHaveRoute(routeName) {
+        cy.get(this.routeTableSelector)
+            .find(`tbody tr[data-testid="${routeName}"]`)
+            .should('not.exist');
+        return this;
     }
 
     deleteRouteByName(routeName) {
@@ -64,7 +65,6 @@ class RouteMainPage {
         cy.get(this.deleteConfirmInputSelector).type(routeName);
         cy.get(this.deleteConfirmButtonSelector).click();
     }
-
 }
 
 export { RouteMainPage };

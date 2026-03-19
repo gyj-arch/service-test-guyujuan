@@ -1,0 +1,107 @@
+{
+    "invalidURLs": [
+        "http",
+        "api.example.com",
+        "htps://api.example.com",
+        "https://api.example.com:80a",
+        "https://###",
+        "https://api.example.com:65536"
+    ],
+    "validURLs": [
+        "http://api.example.com",
+        "https://api.example.com",
+        "http://api.example.com:8080",
+        "https://api.example.com:8443"
+    ],
+    "invalidHosts": [
+        "   ",
+        "example..com",
+        "api/test.com",
+        ".example.com",
+        "api@test.com",
+        "123.456.789"
+    ],
+    "validHosts": [
+        "example.com",
+        "api.example.com",
+        "sub.api.example.com",
+        "localhost",
+        "127.0.0.1"
+    ],
+    "invalidPaths": [
+        "   ",
+        "api//service",
+        "/api/service?invalid",
+        "/api/service#hash",
+        "\u0000/api",
+        "api\\service"
+    ],
+    "validPaths": [
+        "/api",
+        "/api/v1/service",
+        "/api/v1/service/list",
+        "/"
+    ],
+    "invalidPorts": [
+        -1,
+        0,
+        65536,
+        99999,
+        -8080,
+        "abc",
+        "8080a",
+        8080.5
+    ],
+    "validPorts": [
+        1,
+        80,
+        443,
+        8080,
+        8443,
+        3000,
+        65535
+    ],
+    "invalidConnectionTimeout": [
+        -1,
+        -1000,
+        "abc",
+        "10s",
+        2147483647,
+        null
+    ],
+    "validConnectionTimeout": [
+        0,
+        1,
+        100,
+        30000,
+        2147483646
+    ],
+    "invalidWriteTimeout": [
+        -1,
+        -5000,
+        "abc",
+        "5s",
+        2147483647,
+        null
+    ],
+    "validWriteTimeout": [
+        0,
+        1,
+        500,
+        2147483646
+    ],
+    "invalidReadTimeout": [
+        -1,
+        -10000,
+        "abc",
+        "10s",
+        2147483647,
+        null
+    ],
+    "validReadTimeout": [
+        0,
+        1,
+        500,
+        2147483646
+    ]
+}

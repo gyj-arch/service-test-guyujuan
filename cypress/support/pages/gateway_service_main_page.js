@@ -15,20 +15,6 @@ class GatewayServiceMainPage {
         this.deleteServiceDialogSelector = 'div[aria-label="Delete a Gateway Service"][role="dialog"]'
         this.deleteConfirmInputSelector = 'input[data-testid="confirmation-input"]'
         this.deleteConfirmButtonSelector = 'button[data-testid="modal-action-button"]'
-
-    }
-
-    get pageTitleElement() {
-        return cy.get(this.pageTitleSelector);
-    }
-
-    get pageDescriptionElement() {
-        return cy.get(this.pageDescriptionSelector);
-    }
-
-    get newGatewayServiceButton() {
-        return cy.get(this.newGatewayServiceButtonSelector)
-            .contains('New gateway service');
     }
 
     getServiceRowByName(serviceName) {
@@ -51,9 +37,23 @@ class GatewayServiceMainPage {
     }
 
     waitPageLoaded() {
-        this.pageTitleElement.should('be.visible');
-        this.pageDescriptionElement.should('be.visible');
-        this.newGatewayServiceButton.should('be.visible');
+        cy.get(this.pageTitleSelector, { timeout: 10000 }).should('be.visible');
+        cy.get(this.pageDescriptionSelector, { timeout: 10000 }).should('be.visible');
+        cy.get(this.newGatewayServiceButtonSelector, { timeout: 10000 }).should('be.visible');
+        return this;
+    }
+
+    shouldHaveService(serviceName){
+        cy.get(this.serviceTableSelector)
+            .find(`tbody tr[data-testid="${serviceName}"]`)
+            .should('have.length', 1);
+        return this;
+    }
+
+    shouldNotHaveService(serviceName) {
+        cy.get(this.serviceTableSelector)
+            .find(`tbody tr[data-testid="${serviceName}"]`)
+            .should('not.exist');
         return this;
     }
 
@@ -78,7 +78,7 @@ class GatewayServiceMainPage {
     }
 
     clickNewGatewayService() {
-        this.newGatewayServiceButton.should('be.visible').click();
+        cy.get(this.newGatewayServiceButtonSelector).scrollIntoView().should('be.visible').click();
         return new GatewayServiceNewPage();
     }
 }

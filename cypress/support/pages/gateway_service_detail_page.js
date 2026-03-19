@@ -8,6 +8,7 @@ class GatewayServiceDetailPage {
         this.pathSelector = 'div[data-testid="path-property-value"]'
         this.hostSelector = 'div[data-testid="host-plain-text"]'
         this.portSelector = 'div[data-testid="port-plain-text"]'
+        //add add route button selector
     }
 
     getServiceId() {
