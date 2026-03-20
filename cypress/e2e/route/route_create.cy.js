@@ -12,8 +12,6 @@ describe('Create Gateway Service', () => {
     let routeNames = [];
     let shouldRouteCreated;
     let createService;
-    let shouldRouteWorks;
-    let defaultHost;
 
     before(() => {
         cy.fixture('basicFlow.json').then((config) => {
@@ -25,7 +23,6 @@ describe('Create Gateway Service', () => {
                 serverConfig = { ...config };
                 adminURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.adminPort}`;
                 serverURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.serverPort}`;
-                defaultHost = `${serverConfig.host}:${serverConfig.serverPort}`;
         })
 
         createService = function(config) {
@@ -55,35 +52,7 @@ describe('Create Gateway Service', () => {
                 expect(response.status).to.equal(200);
                 expect(response.body).to.have.property('name', config.name);
             });
-        }
-
-        shouldRouteWorks = (routeURL,host = defaultHost) => {
-            cy.log(`Making request to ${routeURL} to verify the route works correctly`);
-            // Make a request to the route we just created
-            const RETRY_TIMEOUT = 3 * 60 * 1000;
-            const RETRY_INTERVAL = 5000;
-        
-            recurse(
-              () => cy.request({
-                method: 'GET',
-                url: routeURL,
-                failOnStatusCode: false,
-                headers: {
-                    Host: host
-                }
-              }),
-              (response) => response.status === 200,
-              {
-                timeout: RETRY_TIMEOUT,
-                delay: RETRY_INTERVAL,
-                log: true,
-                limit: Infinity,
-                errorMsg: `request ${routeURL} timeout! Response status is not 200 with 3 minutes retrying...`
-              }
-            ).then((response) => {
-              expect(response.status).to.eq(200);
-            });
-        }    
+        }   
     })
 
     beforeEach(() => {
@@ -129,12 +98,11 @@ describe('Create Gateway Service', () => {
             .createBasicRouteFromRouteMainPage(routeConfig);
         shouldRouteCreated(routeConfig);
         
-
         //the route is displayed in the route main page
         routeBusiness.shouldRoutePageHaveRoute(routeConfig.name);    
 
         //the route should works correctly
-        shouldRouteWorks(serverURL+routeConfig.path);
+        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path);
     })
 
     it('create advanced route from routes page', () => {
@@ -162,8 +130,8 @@ describe('Create Gateway Service', () => {
         
         
         //the routes should works correctly
-        shouldRouteWorks(serverURL+routeConfig.path1,routeConfig.host1);
-        shouldRouteWorks(serverURL+routeConfig.path2,routeConfig.host2);
+        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path1, { headers: { Host: routeConfig.host1 } });
+        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path2, { headers: { Host: routeConfig.host2 } });
     })
 
     it('create two routes for a service from service detail page', () => {
@@ -223,7 +191,7 @@ describe('Create Gateway Service', () => {
 
 
         //the routes should works correctly
-        shouldRouteWorks(serverURL+routeConfig.path);
-        shouldRouteWorks(serverURL+anotherRouteConfig.path);
+        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path);
+        cy.shouldRouteWorksCorrectly(serverURL+anotherRouteConfig.path);
     })
 })

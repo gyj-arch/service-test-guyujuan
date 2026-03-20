@@ -1,57 +1,57 @@
 # Kong Gateway Manager E2E Tests
 
-Cypress E2E 測試套件，用於驗證 Kong Gateway Manager 的 Service 與 Route 生命週期：建立、驗證、更新與刪除。支援 UI 操作與 Kong Admin API 操作。
+Cypress E2E test suite for validating Kong Gateway Manager's Service and Route lifecycle: create, verify, update, and delete. Supports both UI operations and Kong Admin API operations.
 
-## 前置需求
+## Prerequisites
 
 - **Node.js** 18+
-- **Kong Gateway** 運行中（或透過 Docker）
-- **Kong Manager** 可訪問（用於 UI 操作）
+- **Kong Gateway** running (or via Docker)
+- **Kong Manager** accessible (for UI operations)
 
-## 專案結構
+## Project Structure
 
 ```
 ├── cypress/
-│   ├── e2e/                           # 測試規格
-│   │   ├── gateway_service/           # Service 相關測試
-│   │   │   ├── service_create.cy.js       # 建立 Service（UI）
-│   │   │   └── service_new_grid.cy.js      # Service 列表/網格
-│   │   ├── route/                     # Route 相關測試
-│   │   │   ├── route_create.cy.js         # 建立 Route（API + UI）
-│   │   │   └── route_parameters_match.cy.js  # Route 參數（strip_path 等）
-│   │   └── service_route_basic_flow.cy.js   # 完整流程：Service → Route → 驗證 → 刪除
-│   ├── fixtures/                      # 測試資料
-│   │   ├── basicFlow.json             # Service/Route 預設配置
-│   │   ├── kongManager.json           # Kong 連線配置
+│   ├── e2e/                           # Test specs
+│   │   ├── gateway_service/           # Service tests
+│   │   │   ├── service_create.cy.js       # Create Service (UI)
+│   │   │   └── service_new_grid.cy.js     # Service list/grid
+│   │   ├── route/                     # Route tests
+│   │   │   ├── route_create.cy.js         # Create Route (API + UI)
+│   │   │   └── route_parameters_match.cy.js  # Route params (strip_path, etc.)
+│   │   └── service_route_basic_flow.cy.js   # Full flow: Service → Route → verify → delete
+│   ├── fixtures/                      # Test data
+│   │   ├── basicFlow.json             # Default Service/Route config
+│   │   ├── kongManager.json           # Kong connection config
 │   │   ├── gatewayService.json
 │   │   └── serviceParametersCheck.json
 │   ├── support/
-│   │   ├── commands.js                # 自訂命令（含 Kong API 命令）
-│   │   ├── e2e.js                     # 全域設定、generateRandomId
-│   │   ├── services/                  # 業務邏輯
+│   │   ├── commands.js                # Custom commands (incl. Kong API)
+│   │   ├── e2e.js                     # Global setup, generateRandomId
+│   │   ├── services/                  # Business logic
 │   │   │   ├── gateway_service_business.js
 │   │   │   └── route_business.js
-│   │   └── pages/                     # Page Object
-│   ├── reports/                       # Mochawesome 報告輸出
-│   └── screenshots/                   # 失敗截圖
+│   │   └── pages/                     # Page Objects
+│   ├── reports/                       # Mochawesome report output
+│   └── screenshots/                   # Failure screenshots
 ├── .github/workflows/
-│   └── cypress.yaml                   # CI 配置（Chrome、Firefox、Edge）
+│   └── cypress.yaml                   # CI config (Chrome, Firefox, Edge)
 ├── .vscode/
-│   └── launch.json                    # VS Code 除錯配置
+│   └── launch.json                    # VS Code debug config
 └── cypress.config.js
 ```
 
-## 安裝
+## Installation
 
 ```bash
 npm ci
 ```
 
-## 配置
+## Configuration
 
-### 1. Kong 連線配置
+### 1. Kong Connection Config
 
-編輯 `cypress/fixtures/kongManager.json`：
+Edit `cypress/fixtures/kongManager.json`:
 
 ```json
 {
@@ -66,17 +66,17 @@ npm ci
 }
 ```
 
-| 欄位 | 說明 |
-|------|------|
-| `host` / `port` | Kong Manager UI 位址 |
-| `adminPort` | Kong Admin API 埠（建立/刪除 Service、Route） |
-| `serverPort` | Kong Proxy 埠（驗證 Route 是否可達） |
-| `workspace` | Kong 工作區名稱 |
-| `adminURL` | Admin API 完整 URL（優先使用，避免 URL 解析錯誤） |
+| Field | Description |
+|-------|-------------|
+| `host` / `port` | Kong Manager UI address |
+| `adminPort` | Kong Admin API port (create/delete Service, Route) |
+| `serverPort` | Kong Proxy port (verify Route reachability) |
+| `workspace` | Kong workspace name |
+| `adminURL` | Admin API full URL (preferred, avoids URL parsing issues) |
 
 ### 2. Base URL
 
-`cypress.config.js` 已設定 `baseUrl: 'http://localhost:8002'`。若需覆寫，可設定環境變數：
+`cypress.config.js` sets `baseUrl: 'http://localhost:8002'`. To override, set the environment variable:
 
 **Windows (PowerShell):**
 ```powershell
@@ -88,95 +88,105 @@ $env:CYPRESS_BASE_URL = 'http://localhost:8002'
 export CYPRESS_BASE_URL='http://localhost:8002'
 ```
 
-### 3. 測試資料
+### 3. Test Data
 
-`cypress/fixtures/basicFlow.json` 定義預設 Service 與 Route 配置，可依需求調整。
+`cypress/fixtures/basicFlow.json` defines default Service and Route configuration. Adjust as needed.
 
-## 執行測試
+## Running Tests
 
-| 指令 | 說明 |
-|------|------|
-| `npm run cypress:open` | 開啟 Cypress 互動式執行器 |
-| `npm run cypress:run` | 無頭模式執行 |
-| `npm run cypress:chrome` | 使用 Chrome 執行 |
-| `npm run test:e2e` | 等同 `cypress:run` |
-| `npm run test:e2e:report` | 執行並產生 Mochawesome 報告 |
-| `npm run test:ci` | CI 模式（JUnit 報告） |
+| Command | Description |
+|---------|-------------|
+| `npm run cypress:open` | Open Cypress interactive runner |
+| `npm run cypress:run` | Run headless |
+| `npm run cypress:chrome` | Run with Chrome |
+| `npm run test:e2e` | Same as `cypress:run` |
+| `npm run test:e2e:report` | Run with Mochawesome report |
+| `npm run test:ci` | CI mode (JUnit report) |
 
-## 自訂命令（Kong API）
+## Custom Commands (Kong API)
 
-`cypress/support/commands.js` 提供以下 Kong Admin API 命令：
+`cypress/support/commands.js` provides these Kong Admin API commands:
 
-| 命令 | 說明 |
-|------|------|
-| `cy.createServiceViaAPI(serviceConfig)` | 建立 Service，回傳 response |
-| `cy.createRouteViaAPI(routeConfig)` | 建立 Route（routeConfig 需含 `service` 名稱或 ID） |
-| `cy.updateRouteViaAPI(routeId, routeUpdates)` | 更新 Route |
-| `cy.deleteServiceViaAPI(serviceNameOrId)` | 刪除 Service |
-| `cy.deleteRouteViaAPI(routeNameOrId)` | 刪除 Route |
-| `cy.shouldRouteWorksCorrectly(routeURL, options)` | 驗證 Route 回傳 200，回傳 response |
-| `cy.shouldRouteNotWorks(routeURL, options)` | 驗證 Route 回傳 404/426/5xx，回傳 response |
+| Command | Description |
+|---------|-------------|
+| `cy.createServiceViaAPI(serviceConfig)` | Create Service, returns response |
+| `cy.createRouteViaAPI(routeConfig)` | Create Route (routeConfig must include `service` name or ID) |
+| `cy.updateRouteViaAPI(routeId, routeUpdates)` | Update Route |
+| `cy.deleteServiceViaAPI(serviceNameOrId)` | Delete Service |
+| `cy.deleteRouteViaAPI(routeNameOrId)` | Delete Route |
+| `cy.shouldRouteWorksCorrectly(routeURL, options)` | Verify Route returns 200, returns response |
+| `cy.shouldRouteNotWorks(routeURL, options)` | Verify Route returns 404/426/5xx, returns response |
 
-### shouldRouteWorksCorrectly / shouldRouteNotWorks 參數
+### shouldRouteWorksCorrectly / shouldRouteNotWorks Options
 
-兩者皆接受 `options` 物件（可選）：
+Both accept an optional `options` object:
 
 ```javascript
 {
-  method: 'GET',           // HTTP 方法，預設 GET
-  headers: {},              // 請求頭，如 { Host: 'api.example.com' }
-  https_redirect_status_code: 426  // 僅 shouldRouteNotWorks：HTTPS 升級時預期狀態碼
+  method: 'GET',           // HTTP method, default GET
+  headers: {},             // Request headers, e.g. { Host: 'api.example.com' }
+  https_redirect_status_code: 426  // shouldRouteNotWorks only: expected status for HTTPS upgrade
 }
 ```
 
-**shouldRouteNotWorks** 視為成功的狀態碼：404、426、5xx（500–599）。可透過 `.then((res) => res)` 取得 response。
+**shouldRouteNotWorks** treats these as success: 404, 426, 5xx (500–599). Use `.then((res) => res)` to get the response.
 
 ```javascript
-// 基本用法
+// Basic usage
 cy.shouldRouteWorksCorrectly('http://localhost:8000/anything');
 cy.shouldRouteNotWorks('http://localhost:8000/unknown-path').then((res) => expect(res.status).to.eq(404));
 
-// 帶 options
+// With options
 cy.shouldRouteWorksCorrectly(url, { method: 'POST', headers: { Host: 'api.example.com' } });
 cy.shouldRouteNotWorks(url, { headers: { Host: 'api.example.com' } });
 ```
 
-## 測試流程
+## Test Flows
 
 ### service_route_basic_flow.cy.js
-完整 UI 流程：建立 Service → 建立 Route → 驗證 Route 可達 → 刪除 Route → 刪除 Service → 驗證 404。
+Full UI flow: Create Service → Create Route → Verify Route works → Delete Route → Delete Service → Verify 404.
 
 ### route_parameters_match.cy.js
-透過 API 建立 Service 與 Route，驗證 `strip_path` 行為：
-- strip_path=true：路徑被移除後轉發，請求可達（200）
-- strip_path=false：路徑保留，請求不匹配路徑時回傳 404/426/5xx
+Creates Service and Route via API, verifies `strip_path` behavior:
+- strip_path=true: Path stripped before forwarding, request succeeds (200)
+- strip_path=false: Path preserved, returns 404/426/5xx when path doesn't match
 
 ### route_create.cy.js
-建立 Service（API）與 Route（UI），驗證 Route 建立成功並可達。
+Creates Service (API) and Route (UI), verifies Route creation and reachability.
 
 ### service_create.cy.js
-透過 UI 建立 Gateway Service，驗證建立成功。
+Creates Gateway Service via UI, verifies creation success.
 
-## 報告
+## Run Scripts
 
-- **Mochawesome**：`cypress/reports/`（HTML + JSON）
-- **截圖**：`cypress/screenshots/`（失敗時）
-- **影片**：可在 `cypress.config.js` 中啟用
+| Script | Platform |
+|--------|----------|
+| `./run-e2e.sh` | Linux (Ubuntu/Debian) |
+| `./run-e2e-mac.sh` | macOS |
+| `run-e2e.bat` | Windows |
 
-## 除錯
+Scripts: git pull → npm ci → start Kong (Docker) → run tests → stop Docker. Set `SKIP_INSTALL=1` to skip dependency installation on Linux.
 
-使用 `.vscode/launch.json` 在 VS Code 中除錯 Cypress 測試。選擇對應的除錯配置後按 F5。
+## Reports
 
-## CI（GitHub Actions）
+- **Mochawesome**: `cypress/reports/` (HTML + JSON)
+- **Screenshots**: `cypress/screenshots/` (on failure)
+- **Videos**: Enable in `cypress.config.js` if needed
 
-- **觸發**：`main`、`develop` 的 `push` 與 `pull_request`
-- **瀏覽器**：Chrome、Firefox、Edge
-- **流程**：透過 `docker/docker-compose` 啟動 Kong，執行 Cypress 測試
-- **產物**：報告、截圖、影片（失敗時）上傳為 Artifact
+## Debugging
 
-**注意**：CI 需要 `docker/` 目錄與 `docker-compose` 配置。
+Use `.vscode/launch.json` in VS Code to debug Cypress tests. Select the matching debug config and press F5.
 
-## 備註
+## CI (GitHub Actions)
 
-- 若需登入，可在 `cypress/support/commands.js` 實作 `cy.login()`
-- 選擇器若使用 `data-testid`，請在 `cypress/support/pages/` 中同步更新
+- **Triggers**: `push` and `pull_request` on `main` and `develop`
+- **Browsers**: Chrome, Firefox, Edge
+- **Flow**: Start Kong via `docker/docker-compose`, run Cypress tests
+- **Artifacts**: Reports, screenshots, videos (on failure) uploaded
+
+**Note**: CI requires `docker/` directory and `docker-compose` configuration.
+
+## Notes
+
+- Implement `cy.login()` in `cypress/support/commands.js` if authentication is required
+- If selectors use `data-testid`, update `cypress/support/pages/` accordingly
