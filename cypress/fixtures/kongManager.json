@@ -6,5 +6,5 @@
     "protocol":"http",
     "workspace":"default",
     "serverBaseURL":"http://localhost:8002",
-    "adminURL":"http://localhost:8001"
+    "serverAdminURL":"http://localhost:8001"
 }

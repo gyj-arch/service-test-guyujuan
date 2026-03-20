@@ -1,4 +1,6 @@
-class RouteDetailViewPage {
+import { RouteNewPage } from "./route_new_page"
+
+class RouteDetailPage {
     constructor() {
         this.routeIdSelector = 'div[data-testid="id-copy-uuid"]'
         this.routeIdValueClass = '.copy-text.monospace'
@@ -11,7 +13,7 @@ class RouteDetailViewPage {
         this.pathTextClass = 'div[class="copy-text"]'
         this.methodsValueSelector = 'div[data-testid^="methods-badge-method-"]'
         this.methodTextClass = 'div[class="badge-content-wrapper"]'
-    }
+   }
 
     getRouteId() {
         return cy.get(this.routeIdSelector, { timeout: 10000 })
@@ -85,5 +87,5 @@ class RouteDetailViewPage {
     }
 }
 
-export { RouteDetailViewPage };
-export const routeDetailViewPage = new RouteDetailViewPage();    
+export { RouteDetailPage };
+export const routeDetailPage = new RouteDetailPage();    

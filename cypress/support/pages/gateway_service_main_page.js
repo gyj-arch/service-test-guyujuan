@@ -1,3 +1,4 @@
+import { GatewayServiceDetailPage } from "./gateway_service_detail_page"
 import { GatewayServiceNewPage } from "./gateway_service_new_page"
 
 /**
@@ -58,10 +59,7 @@ class GatewayServiceMainPage {
     }
 
     hasServiceRows() {
-        cy.get('body', { timeout: 10000 }).then(($body) => {
-            return $body.find('div.kong-ui-entities-gateway-services-list table tbody tr').length > 0;
-        });
-        return this;
+        cy.get(this.serviceTableSelector).should('exist');
     }
 
     waitServicesTableLoaded() {
@@ -75,6 +73,11 @@ class GatewayServiceMainPage {
             cy.visit(gatewayServiceMainPageURL);
         })
         return this;
+    }
+
+    openServiceDetailPage(serviceName){
+        this.getServiceRowByName(serviceName).click();
+        return new GatewayServiceDetailPage;
     }
 
     clickNewGatewayService() {

@@ -1,6 +1,7 @@
 {
   "service": {
     "name": "httpbin-service",
+    "protocol": "http",
     "url": "http://httpbin.org",
     "host": "httpbin.org",
     "path": "/",
@@ -9,7 +10,11 @@
   "route": {
     "name": "httpbin-route",
     "service": "httpbin-service",
-    "path": "/httpbin",
+    "path": "/anything",
+    "path1": "/httpbin/v1",
+    "path2": "/httpbin/v2",
+    "host1": "api.example.com",
+    "host2": "api.example.org",
     "method": "GET",
     "stripPath": "true",
     "host": "api.example.com",

@@ -65,12 +65,12 @@ describe('Create Gateway Service', () => {
             });
 
         //switch and check the status of the service
-        gatewayServiceBusiness.shouldServicePageHaveService(serviceConfig.name);
-        gatewayServiceBusiness.shouldServiceIsEnabled(serviceConfig.name);
-        gatewayServiceBusiness.swithServiceStatus(serviceConfig.name);
-        gatewayServiceBusiness.shouldServiceIsDisabled(serviceConfig.name);
-        gatewayServiceBusiness.swithServiceStatus(serviceConfig.name);
-        gatewayServiceBusiness.shouldServiceIsEnabled(serviceConfig.name);
+        gatewayServiceBusiness.shouldServicePageHaveService(serviceConfig.name)
+                .shouldServiceIsEnabled(serviceConfig.name)
+        gatewayServiceBusiness.switchServiceStatus(serviceConfig.name)
+                .shouldServiceIsDisabled(serviceConfig.name)
+        gatewayServiceBusiness.switchServiceStatus(serviceConfig.name)
+                .shouldServiceIsEnabled(serviceConfig.name);
     })
 
     it('create gateway service with seperate url component', () => {

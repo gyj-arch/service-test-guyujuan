@@ -15,6 +15,7 @@ class GatewayServiceBusiness {
       cy.visit(gatewayServiceMainPageURL);
       this.gatewayServiceMainPage.waitPageLoaded();
     })
+    return new GatewayServiceMainPage();
   }
 
   /**
@@ -45,54 +46,20 @@ class GatewayServiceBusiness {
     newGatewayServicePage.verifyServiceCreatedSuccessNotification(serviceConfig.name);
     return gatewayServiceDetailPage;
   }
-
-
-createBasicRoute(routeConfig,serviceName) {
-  this.navigateToGatewayServiceMainPage()
-  const newRoutePage = this.gatewayServiceMainPage.clickNewRoute();
-  const routeDetailPage = newRoutePage
-    .fillName(routeConfig.name)
-    .selectBasicOption()
-    .selectService(serviceName)
-    .fillTags(routeConfig.tags)
-    .fillPath(routeConfig.path)
-    .fillStripPath(routeConfig.stripPath)
-    .selectMethod(routeConfig.method)
-    .save();
-  newRoutePage.verifyRouteCreatedSuccessNotification(routeConfig.name);
-  return routeDetailPage;
-}
-
-createAdvancedRoute(routeConfig,serviceName) {
-  this.navigateToGatewayServiceMainPage()
-  const newRoutePage = this.gatewayServiceMainPage.clickNewRoute();
-  const routeDetailPage = newRoutePage
-    .fillName(routeConfig.name)
-    .selectAdvancedOption()
-    .fillHost(routeConfig.host)
-    .fillPath(routeConfig.path)
-    .fillPort(routeConfig.port)
-    .fillProtocol(routeConfig.protocol)
-    .fillTags(routeConfig.tags)
-    .save();
-  newRoutePage.verifyRouteCreatedSuccessNotification(routeConfig.name);
-  return routeDetailPage;
-}
-
   /**
    * @param {string} serviceName
    */
   deleteGatewayService(serviceName) {
-    this.gatewayServiceMainPage
-      .navigateToGatewayServiceMainPage()
+    this.navigateToGatewayServiceMainPage()
       .waitPageLoaded()
       .deleteServiceByName(serviceName);
+    return this;
   }
 
   navigateToGatewayServiceNewPage() {
-    this.navigateToGatewayServiceMainPage();
-    this.gatewayServiceMainPage.waitPageLoaded().clickNewGatewayService();
-    return this.gatewayServiceNewPage;
+    return this.navigateToGatewayServiceMainPage()
+      .waitPageLoaded()
+      .clickNewGatewayService();
   }
   /**
  * Verify all invalid and valid parameters for the new gateway service page
@@ -111,6 +78,7 @@ createAdvancedRoute(routeConfig,serviceName) {
       default:
       //
     }
+    return this;
   }
 
   shouldServicePageHaveService(serviceName) {
@@ -143,7 +111,7 @@ createAdvancedRoute(routeConfig,serviceName) {
     return this;
   }
 
-  swithServiceStatus(serviceName) {
+  switchServiceStatus(serviceName) {
     this.gatewayServiceMainPage
       .getServiceRowByName(serviceName)
       .find('[data-testid="switch-control"]')
