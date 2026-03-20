@@ -1,14 +1,15 @@
 import { RouteMainPage } from "../pages/route_main_page"
 import { GatewayServiceBusiness } from "./gateway_service_business"
-import { GatewayServiceMainPage } from "../pages/gateway_service_main_page"
 import { GatewayServiceDetailPage } from "../pages/gateway_service_detail_page"
+import { RouteNewPage } from "../pages/route_new_page"
+import { RouteDetailPage } from "../pages/route_detail_page"
 
 class RouteBusiness {
   constructor() {
     this.routeMainPage = new RouteMainPage();
-    this.gatewayServiceMainPage = new GatewayServiceMainPage();
     this.gatewayServiceBusiness = new GatewayServiceBusiness();
-    this.gatewayServiceDetailPage = new GatewayServiceDetailPage();
+    this.routeDetailPage = new RouteDetailPage();
+    this.routeNewPage = new RouteNewPage();
   }
 
   navigateToRouteMainPage() {
@@ -19,60 +20,44 @@ class RouteBusiness {
   }
 
   navigateToServiceMainPage() {
-    this.gatewayServiceBusiness
+    return this.gatewayServiceBusiness
       .navigateToGatewayServiceMainPage()
       .waitPageLoaded();
-    return this;
   }
 
   /**
    * @param {Object} routeConfig 
    */
-  createRoute(routeConfig) {
-    this.navigateToRouteMainPage();
+  // createRoute(routeConfig) {
+  //   this.navigateToRouteMainPage();
+  //   const routeNewPage = this.routeMainPage.clickNewRoute();
+  //   const routeDetailPage = routeNewPage
+  //     .fillName(routeConfig.name)
+  //     .selectService(routeConfig.service)
+  //     .fillPath(routeConfig.path)
+  //     .fillStripPath(routeConfig.stripPath)
+  //     .selectMethod(routeConfig.method)
+  //     .save();
+  //   routeNewPage.verifyRouteCreatedSuccessNotification(routeConfig.name);
+  //   return routeDetailPage;
+  // }
+
+  createBasicRouteFromRouteMainPage(routeConfig, serviceName) {
+    const routeMainPage = this.navigateToRouteMainPage();;
     const routeNewPage = this.routeMainPage.clickNewRoute();
-    const routeDetailViewPage = routeNewPage
+    const routeDetailPage = routeNewPage
       .fillName(routeConfig.name)
+      .selectBasicOption()
       .selectService(routeConfig.service)
+      .fillTags(routeConfig.tags)
       .fillPath(routeConfig.path)
-      .fillStripPath(routeConfig.stripPath)
       .selectMethod(routeConfig.method)
       .save();
     routeNewPage.verifyRouteCreatedSuccessNotification(routeConfig.name);
-    return routeDetailViewPage;
-  }
-  
-  createBasicRoute(routeConfig) {
-    this.navigateToRouteMainPage();
-    const newRoutePage = this.routeMainPage.clickNewRoute();
-    const routeDetailPage = newRoutePage
-      .fillName(routeConfig.name)
-      .selectBasicOption()
-      .selectService(routeConfig.service)
-      .fillTags(routeConfig.tags)
-      .fillPath(routeConfig.path)
-      .selectMethod(routeConfig.method)
-      .save();
-    newRoutePage.verifyRouteCreatedSuccessNotification(routeConfig.name);
-    return routeDetailPage;
-  }
-
-  createBasicRouteFromRouteMainPage(routeConfig, serviceName) {
-    this.navigateToServiceMainPage();
-    const newRoutePage = this.serviceDetailPage.clickNewRoute();
-    const routeDetailPage = newRoutePage
-      .fillName(routeConfig.name)
-      .selectBasicOption()
-      .selectService(routeConfig.service)
-      .fillTags(routeConfig.tags)
-      .fillPath(routeConfig.path)
-      .selectMethod(routeConfig.method)
-      .save();
-    newRoutePage.verifyRouteCreatedSuccessNotification(routeConfig.name);
     return routeDetailPage;
   }
   
-  createAdvancedRoute(routeConfig) {
+  createAdvancedRouteFromRouteMainPage(routeConfig) {
     this.routeMainPage
       .navigateToRouteMainPage()
       .waitPageLoaded();
@@ -83,15 +68,28 @@ class RouteBusiness {
       .fillTags(routeConfig.tags)
       .selectAdvancedOption()
       .selectProtocol(routeConfig.protocol)
-      .fillPath(routeConfig.path+"/v1",1)
+      .fillPath(routeConfig.path1,1)
       .addPath()
-      .fillPath(routeConfig.path+"/v2",2)
-      .fillHost(routeConfig.host,1)
+      .fillPath(routeConfig.path2,2)
+      .fillHost(routeConfig.host1,1)
       .addHost()
-      .fillHost(routeConfig.host.replace(".com",".org"),2)
+      .fillHost(routeConfig.host2,2)
       .save();
     newRoutePage.verifyRouteCreatedSuccessNotification(routeConfig.name);
     return routeDetailPage;
+  }
+
+  createBasicRouteFromServiceDetailPage(routeConfig) {
+    const newRoutePage = new RouteNewPage();
+    const routeDetailPage = newRoutePage
+      .fillName(routeConfig.name)
+      .selectBasicOption()
+      .fillTags(routeConfig.tags)
+      .fillPath(routeConfig.path)
+      .selectMethod(routeConfig.method)
+      .save();
+    newRoutePage.verifyRouteCreatedSuccessNotification(routeConfig.name);
+    return new GatewayServiceDetailPage();
   }
 
   shouldRoutePageHaveRoute(routeName) {

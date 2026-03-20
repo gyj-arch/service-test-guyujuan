@@ -23,9 +23,9 @@ class RouteMainPage {
     }
 
     waitPageLoaded() {
-        cy.get(this.pageTitleSelector).should('be.visible');
-        cy.get(this.pageDescriptionSelector).should('be.visible');
-        cy.get(this.newRouteButtonSelector).should('be.visible');
+        cy.get(this.pageTitleSelector, { timeout: 10000 }).should('be.visible');
+        cy.get(this.pageDescriptionSelector, { timeout: 10000 }).should('be.visible');
+        cy.get(this.newRouteButtonSelector, { timeout: 10000 }).should('be.visible');
         return this;
     }
 

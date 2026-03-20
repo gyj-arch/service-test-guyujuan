@@ -1,4 +1,4 @@
-import { RouteDetailViewPage } from "./route_detail_page";  
+import { RouteDetailPage } from "./route_detail_page";  
 /**
  * Page Object for the New Route creation page
  */
@@ -110,17 +110,14 @@ class RouteNewPage {
 
     save() {    
         cy.get(this.saveButtonSelector).click();
-        return new RouteDetailViewPage();
+        return new RouteDetailPage();
     }
 
     verifyRouteCreatedSuccessNotification(routeName) {
         cy.get(this.popUpSuccessMessageSelector, { timeout: 20000 })
+            .should('contain', `Route "${routeName}" successfully created!`)
             .scrollIntoView()
             .should('be.visible');
-        cy.get(this.popUpSuccessMessageTextSelector)
-            .scrollIntoView()
-            .should('be.visible')
-            .and('contain', `Route "${routeName}" successfully created!`);
     }
 }
 

@@ -1,3 +1,5 @@
+import { RouteNewPage } from "./route_new_page"
+
 class GatewayServiceDetailPage {
     constructor() {
         this.titleSelector = 'header span.title';
@@ -8,7 +10,10 @@ class GatewayServiceDetailPage {
         this.pathSelector = 'div[data-testid="path-property-value"]'
         this.hostSelector = 'div[data-testid="host-plain-text"]'
         this.portSelector = 'div[data-testid="port-plain-text"]'
-        //add add route button selector
+        this.addARouteSelector = 'button.add-route-btn'
+        this.routeTabSelector = 'div[data-testid="service-routes"]'
+        this.routeTableRowSelector = 'div.kong-ui-entities-routes-list table tbody tr'
+        this.toolbarAddRouteSelector = 'a[data-testid="toolbar-add-route"]'
     }
 
     getServiceId() {
@@ -42,6 +47,42 @@ class GatewayServiceDetailPage {
         return cy.get(this.pathSelector).scrollIntoView().getText();
     }
 
+    clickAddARouteButton() {
+        cy.get(this.addARouteSelector).contains("Add a Route").click();
+        return new RouteNewPage();
+    }
+
+    clickRoutesTab(){
+        cy.get(this.routeTabSelector).click();
+        return this;
+    }
+
+    shouldAddARouteButtonExist() {
+        cy.get(this.addARouteSelector,{ timeout: 10000 }).contains("Add a Route").should('exist');
+        return this;
+    }
+
+    shouldAddARouteButtonNotExist() {
+        cy.get('body').find(this.addARouteSelector).should('not.exist');
+        return this;
+    }
+
+    getRouteRowByName(routeName) {
+        return cy.get(this.routeTableRowSelector)
+            .filter(`[data-testid="${routeName}"]`);
+    }
+
+    shouldHaveRoute(routeName){
+        cy.get(this.routeTableRowSelector)
+            .find(`tbody tr[data-testid="${routeName}"]`)
+            .should('have.length', 1);
+        return this;
+    }
+
+    clickToobarNewRouteButton(){
+        cy.get(this.toolbarAddRouteSelector).click()
+        return new RouteNewPage();
+    }
 
 }
 

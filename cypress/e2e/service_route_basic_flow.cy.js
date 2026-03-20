@@ -84,7 +84,7 @@ describe('Add Service and Route and then delete them', () => {
   })
 
   it('add a route', () => {
-    routeId = routeBusiness.createBasicRoute(routeConfig).getRouteId().then((id) => {
+    routeId = routeBusiness.createBasicRouteFromRouteMainPage(routeConfig).getRouteId().then((id) => {
       routeId = id;
       cy.log(`Created route with ID: ${routeId}`);
     });
@@ -109,7 +109,7 @@ describe('Add Service and Route and then delete them', () => {
         delay: RETRY_INTERVAL,
         log: true,
         limit: Infinity,
-        errorMsg: `request ${routeURL} timeout！Response status is not 200 with 3 minutes retrying...`
+        errorMsg: `request ${routeURL} timeout! Response status is not 200 with 3 minutes retrying...`
       }
     ).then((response) => {
       expect(response.status).to.eq(200);
@@ -144,7 +144,7 @@ describe('Add Service and Route and then delete them', () => {
         delay: RETRY_INTERVAL,
         log: true,
         limit: Infinity,
-        errorMsg: `request ${routeURL} timeout！Response status is not 404 with 3 minutes retrying...`
+        errorMsg: `request ${routeURL} timeout! Response status is not 404 with 3 minutes retrying...`
       }
     ).then((response) => {
       expect(response.status).to.eq(404);
