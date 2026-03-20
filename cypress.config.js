@@ -4,6 +4,7 @@ module.exports = defineConfig({
   //allowCypressEnv: false,
 
   e2e: {
+    baseUrl: 'http://localhost:8002',
     setupNodeEvents(on, config) {
       // implement node event listeners here
       require('cypress-mochawesome-reporter/plugin')(on);

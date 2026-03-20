@@ -16,8 +16,7 @@
     "host1": "api.example.com",
     "host2": "api.example.org",
     "method": "GET",
-    "stripPath": "true",
-    "host": "api.example.com",
+    "strip_path": "true",
     "tags": "httpbin tag01",
     "protocol": "http,https"
   }

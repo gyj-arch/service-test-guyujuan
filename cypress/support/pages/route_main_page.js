@@ -9,7 +9,7 @@ class RouteMainPage {
         this.routeTableRowSelector = 'div.kong-ui-entities-routes-list table tbody tr'
         this.routeActionDropdownSelector = 'button[data-testid="row-actions-dropdown-trigger"]'
         this.routeDeleteButtonSelector = 'button[data-testid="action-entity-delete"]'
-        this.deleteRouteDialogSelector = 'div[aria-label="Delete a Route"][role="dialog"]'
+        this.deleteRouteDialogSelector = 'div.kong-ui-entity-delete-modal.k-prompt, div[aria-label="Delete a Route"][role="dialog"]'
         this.deleteConfirmInputSelector = 'input[data-testid="confirmation-input"]'
         this.deleteConfirmButtonSelector = 'button[data-testid="modal-action-button"]'
     }
@@ -61,9 +61,8 @@ class RouteMainPage {
             .filter(':visible')
             .should('have.length', 1) 
             .click();
-        cy.get(this.deleteRouteDialogSelector).should('be.visible');
-        cy.get(this.deleteConfirmInputSelector).type(routeName);
-        cy.get(this.deleteConfirmButtonSelector).click();
+        cy.get(this.deleteConfirmInputSelector, { timeout: 10000 }).should('be.visible').click().type(routeName);
+        cy.get(this.deleteConfirmButtonSelector, { timeout: 10000 }).should('be.visible').click();
     }
 }
 

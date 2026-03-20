@@ -36,9 +36,6 @@ class GatewayServiceNewPage {
         return this;
     }
 
-    /**
-     * @param {string} url - The target service URL (e.g., "https://api.example.com/service")
-     */
     fillFullURL(url) {
         cy.get(this.fullURLInputSelector).scrollIntoView().click().clear().type(url);
         return this;
@@ -49,49 +46,31 @@ class GatewayServiceNewPage {
         return this;
     }
 
-    /**
-     * @param {string} host - The service host (e.g., "api.example.com", "localhost")
-     */
     fillHost(host) {
         cy.get(this.hostInputSelector).click().type('{selectall}' + host);
         return this;
     }
 
-    /**
-     * @param {string} path - The service path (e.g., "/api/v1/service")
-     */
     fillPath(path) {
         cy.get(this.pathInputSelector).scrollIntoView().click().clear().type(path);
         return this;
     }
 
-    /**
-     * @param {number} port - The service port (e.g., 8080, 443)
-     */
     fillPort(port) {
         cy.get(this.portInputSelector).scrollIntoView().click().type('{selectall}' + port.toString());
         return this;
     }
 
-    /**
-     * @param {number} timeout - Connection timeout in milliseconds
-     */
     fillConnectionTimeout(timeout) {
         cy.get(this.connectionTimeoutInputSelector).scrollIntoView().click().type('{selectall}' + timeout.toString());
         return this;
     }
 
-    /**
-     * @param {number} timeout - Write timeout in milliseconds
-     */
     fillWriteTimeout(timeout) {
         cy.get(this.writeTimeoutInputSelector).scrollIntoView().click().type('{selectall}' + timeout.toString());
         return this;
     }
 
-    /**
-     * @param {number} timeout - Read timeout in milliseconds
-     */
     fillReadTimeout(timeout) {
         cy.get(this.readTimeoutInputSelector).scrollIntoView().click().type('{selectall}' + timeout.toString());
         return this;
@@ -160,13 +139,6 @@ class GatewayServiceNewPage {
             });
         });
     }
-
-    // checkInvalidPorts(invalidPorts) {
-    //     invalidPorts.forEach((port) => {
-    //     this.gatewayServiceNewPage.fillPort(port)
-    //         .verifyPortErrorMessage();
-    //     });
-    // }
 
     save() {
         cy.get(this.saveButtonSelector).click();

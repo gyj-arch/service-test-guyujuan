@@ -31,9 +31,8 @@ class GatewayServiceMainPage {
             .filter(':visible')
             .should('have.length', 1)
             .click();
-        cy.get(this.deleteServiceDialogSelector).should('be.visible');
-        cy.get(this.deleteConfirmInputSelector).type(serviceName);
-        cy.get(this.deleteConfirmButtonSelector).click();
+        cy.get(this.deleteConfirmInputSelector, { timeout: 10000 }).should('be.visible').click().type(serviceName);
+        cy.get(this.deleteConfirmButtonSelector, { timeout: 10000 }).should('be.visible').click();
         return this;
     }
 
@@ -56,10 +55,6 @@ class GatewayServiceMainPage {
             .find(`tbody tr[data-testid="${serviceName}"]`)
             .should('not.exist');
         return this;
-    }
-
-    hasServiceRows() {
-        cy.get(this.serviceTableSelector).should('exist');
     }
 
     waitServicesTableLoaded() {

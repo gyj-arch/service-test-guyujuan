@@ -3,8 +3,12 @@
     "port":8002,
     "serverPort":8000,
     "adminPort":8001,
+    "httpsServerPort":8443,
+    "httpsAdminPort":8444,
     "protocol":"http",
     "workspace":"default",
     "serverBaseURL":"http://localhost:8002",
-    "serverAdminURL":"http://localhost:8001"
+    "adminURL":"http://localhost:8001",
+    "httpsServerBaseURL":"https://localhost:8443",
+    "httpsAdminURL":"https://localhost:8444"
 }
