@@ -46,6 +46,7 @@ class GatewayServiceBusiness {
     newGatewayServicePage.verifyServiceCreatedSuccessNotification(serviceConfig.name);
     return gatewayServiceDetailPage;
   }
+
   /**
    * @param {string} serviceName
    */
@@ -61,6 +62,7 @@ class GatewayServiceBusiness {
       .waitPageLoaded()
       .clickNewGatewayService();
   }
+
   /**
  * Verify all invalid and valid parameters for the new gateway service page
  * @param {Object} serviceParameters - Test parameters containing invalid and valid values
@@ -75,8 +77,7 @@ class GatewayServiceBusiness {
       // case 'port':
       //   this.gatewayServiceNewPage.checkInvalidPorts(serviceParameters.invalidPorts);
       //   break;
-      default:
-      //
+      //default:
     }
     return this;
   }

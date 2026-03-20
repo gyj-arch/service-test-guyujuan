@@ -28,11 +28,7 @@ describe('Create Gateway Service', () => {
 
     after(() => {
         serviceIds.forEach(serviceId => {
-            cy.request({
-                method: 'DELETE',
-                url: `${adminURL}/services/${serviceId}`,
-                failOnStatusCode: false
-            })
+            cy.deleteServiceViaAPI(serviceId);
         });
     })
 

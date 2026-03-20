@@ -115,7 +115,7 @@ class RouteNewPage {
 
     verifyRouteCreatedSuccessNotification(routeName) {
         cy.get(this.popUpSuccessMessageSelector, { timeout: 20000 })
-            .should('contain', `Route "${routeName}" successfully created!`)
+            .contains(`Route "${routeName}" successfully created!`)
             .scrollIntoView()
             .should('be.visible');
     }

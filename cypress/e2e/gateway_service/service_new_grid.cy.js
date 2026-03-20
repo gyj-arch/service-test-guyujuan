@@ -3,8 +3,7 @@ import { GatewayServiceBusiness } from "../../support/services/gateway_service_b
 describe('Verify Gateway Service Creation Page Grid', () => {
     const gatewayServiceBusiness = new GatewayServiceBusiness()
     let serviceParameters;
-    let adminURL;
-    let serverURL;
+
 
     before(() => {
         cy.fixture('serviceParametersCheck.json')
