@@ -61,19 +61,11 @@ describe('Create Gateway Service', () => {
 
     after(() => {
         routeNames.forEach(routeName => {
-            cy.request({
-                method: 'DELETE',
-                url: `${adminURL}/${serverConfig.workspace}/routes/${routeName}`,
-                failOnStatusCode: false
-            })
+            cy.deleteRouteViaAPI(routeName);
         });
 
         serviceIds.forEach(serviceId => {
-            cy.request({
-                method: 'DELETE',
-                url: `${adminURL}/${serverConfig.workspace}/services/${serviceId}`,
-                failOnStatusCode: false
-            })
+            cy.deleteServiceViaAPI(serviceId);
         });
     })
 
