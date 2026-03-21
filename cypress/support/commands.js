@@ -170,6 +170,12 @@ Cypress.Commands.add('createRouteViaAPI', (routeConfig) => {
       ? routeConfig.methods
       : (routeConfig.method ? routeConfig.method.split(',').map(m => m.trim()) : []);
   }
+  if (routeConfig.preserve_host !== undefined) {
+    body.preserve_host = routeConfig.preserve_host === true || routeConfig.preserve_host === 'true';
+  }
+  if (routeConfig.path_handling) {
+    body.path_handling = routeConfig.path_handling;
+  }
   return cy.fixture('kongManager.json').then((server) => {
     const base = `${server.protocol}://${server.host}:${server.adminPort}`;
     const url = `${base.replace(/\/$/, '')}/${server.workspace || 'default'}/routes`;

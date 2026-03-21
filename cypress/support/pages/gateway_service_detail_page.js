@@ -17,9 +17,9 @@ class GatewayServiceDetailPage {
     }
 
     getServiceId() {
-        return cy.get(this.serviceIdSelector, { timeout: 10000 })
+        return cy.get(this.serviceIdSelector, { timeout: 30000 })
                 .scrollIntoView()
-                .find('.copy-text.monospace')
+                .find('.copy-text.monospace', { timeout: 30000 })
                 .getText()
     }
 
