@@ -9,6 +9,16 @@ echo "=========================================="
 echo "  Kong Gateway Manager E2E Test (macOS)"
 echo "=========================================="
 
+# Detect Docker Compose (v1: docker-compose, v2: docker compose)
+if docker compose version &> /dev/null; then
+  COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null && docker-compose version &> /dev/null; then
+  COMPOSE_CMD="docker-compose"
+else
+  echo "Error: Docker Compose not found. Install docker-compose or Docker Desktop."
+  exit 1
+fi
+
 # Pull code
 echo ""
 echo "=== 1. Git Pull ==="
@@ -23,7 +33,7 @@ npm ci
 echo ""
 echo "=== 3. Start Kong (Docker) ==="
 cd "$SCRIPT_DIR/docker"
-docker compose up -d
+$COMPOSE_CMD up -d
 cd "$SCRIPT_DIR"
 
 echo ""
@@ -34,7 +44,7 @@ until curl -sf http://localhost:8001/status > /dev/null 2>&1; do
   count=$((count + 1))
   if [ $count -ge $max_attempts ]; then
     echo "Error: Kong startup timeout after 120 seconds"
-    cd "$SCRIPT_DIR/docker" && docker compose down
+    cd "$SCRIPT_DIR/docker" && $COMPOSE_CMD down
     exit 1
   fi
   echo "  Waiting for Kong..."
@@ -50,7 +60,7 @@ TEST_EXIT=$?
 echo ""
 echo "=== 6. Stop Docker services ==="
 cd "$SCRIPT_DIR/docker"
-docker compose down
+$COMPOSE_CMD down
 cd "$SCRIPT_DIR"
 
 exit $TEST_EXIT
