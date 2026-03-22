@@ -18,12 +18,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
       
       - name: Install dependencies
@@ -37,7 +37,7 @@ jobs:
           timeout 120 bash -c 'until curl -f http://localhost:8001/status; do sleep 2; done'
 
       - name: Run Cypress on ${{ matrix.browser }}
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           browser: ${{ matrix.browser }}
           install: false
@@ -51,7 +51,7 @@ jobs:
      
       - name: Upload reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: reports-${{ matrix.browser }}
           path: cypress/reports
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: screenshots-${{ matrix.browser }}
           path: cypress/screenshots
@@ -69,7 +69,7 @@ jobs:
       
       - name: Upload videos
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: videos-${{ matrix.browser }}
           path: cypress/videos

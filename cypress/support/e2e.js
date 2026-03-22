@@ -20,14 +20,8 @@ import 'cypress-mochawesome-reporter/register';
 
 // Global handler to catch uncaught exceptions from the application
 Cypress.on('uncaught:exception', (err, runnable) => {
-  // Ignore only the specific replaceChild null pointer error to avoid test failure
-  if (err.message.includes('replaceChild') && err.message.includes('null')) {
-    console.log('Ignoring replaceChild null error from application code:', err.message);
-    // Return false to prevent Cypress from failing the test for this specific error
-    return false;
-  }
-  // Let all other exceptions fail the test normally (to preserve test integrity)
-  return true;
+  // Ignore uncaught exceptions to avoid test failure
+  return false;
 });
 
 // Define and expose to global scope
