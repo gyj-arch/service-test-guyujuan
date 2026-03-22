@@ -32,5 +32,6 @@ module.exports = defineConfig({
     screenshotOnRunFailure: true,
     screenshotsFolder: 'cypress/screenshots',
     chromeWebSecurity: false,
+    allowCypressEnv: false
   },
-});
+})
