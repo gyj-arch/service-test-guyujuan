@@ -1,7 +1,6 @@
-import { RouteBusiness } from "../../support/services/route_business"
 import { recurse } from 'cypress-recurse';
 
-describe('Route Parameters', () => {
+describe('Verify Route Parameters Match', () => {
     let basicConfig;
     let serverConfig;
     let adminURL;
@@ -9,15 +8,12 @@ describe('Route Parameters', () => {
     let serviceIds = [];
     let routeIds = [];
     let serviceConfig;
-    let defaultHost;
 
     before(() => {
         cy.fixture('kongManager.json').then((config) => {
             serverConfig = { ...config };
             adminURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.adminPort}`;
             serverURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.serverPort}`;
-
-            defaultHost = `${serverConfig.host}:${serverConfig.serverPort}`;
         });
 
         cy.fixture('basicFlow.json').then((config) => {
@@ -215,7 +211,6 @@ describe('Route Parameters', () => {
         });
     })
 
-
     it('check preserve_host action', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
@@ -225,6 +220,7 @@ describe('Route Parameters', () => {
         }
         cy.createServiceViaAPI(headersServcieCnfig).then((res) => {
             serviceIds.push(res.body.id);
+            expect(res.status).to.eq(201);
         });
         
         const myHost = "myhost.com";

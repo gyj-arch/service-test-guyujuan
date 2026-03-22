@@ -1,55 +1,106 @@
 # Kong Gateway Manager E2E Tests
 
-Cypress E2E test suite for validating Kong Gateway Manager's Service and Route lifecycle: create, verify, update, and delete. Supports both UI operations and Kong Admin API operations.
+Cypress E2E test suite for validating Kong Gateway Manager's Service and Route lifecycle: create, verify, update, and delete. Covers both Kong Manager UI operations and Kong Admin API operations.
 
 ## Prerequisites
 
 - **Node.js** 18+
-- **Kong Gateway** running (or via Docker)
-- **Kong Manager** accessible (for UI operations)
+- **Docker Desktop** (or Docker + Docker Compose)
+- **Kong Gateway** running locally (via Docker or standalone)
+- **Kong Manager** accessible at `http://localhost:8002`
 
 ## Project Structure
 
 ```
 ├── cypress/
-│   ├── e2e/                           # Test specs
-│   │   ├── gateway_service/           # Service tests
-│   │   │   ├── service_create.cy.js       # Create Service (UI)
-│   │   │   └── service_new_grid.cy.js     # Service list/grid
-│   │   ├── route/                     # Route tests
-│   │   │   ├── route_create.cy.js         # Create Route (API + UI)
-│   │   │   └── route_parameters_match.cy.js  # Route params (strip_path, etc.)
-│   │   └── service_route_basic_flow.cy.js   # Full flow: Service → Route → verify → delete
-│   ├── fixtures/                      # Test data
-│   │   ├── basicFlow.json             # Default Service/Route config
-│   │   ├── kongManager.json           # Kong connection config
-│   │   ├── gatewayService.json
-│   │   └── serviceParametersCheck.json
+│   ├── e2e/                              # Test specs
+│   │   ├── gateway_service/              # Service tests
+│   │   │   ├── service_create.cy.js          # Create Service via UI (full URL & separate components)
+│   │   │   └── service_new_grid.cy.js        # Verify Service creation page parameters
+│   │   ├── route/                        # Route tests
+│   │   │   ├── route_create.cy.js            # Create Route via UI (basic, advanced, from service detail)
+│   │   │   └── route_parameters_match.cy.js  # Route parameter behavior (strip_path, methods, hosts, protocols, preserve_host, https_redirect)
+│   │   └── service_route/                # Combined Service + Route tests
+│   │       ├── service_route_basic_flow.cy.js    # Full lifecycle: create → verify → delete → confirm 404
+│   │       └── multi_services_routes.cy.js       # Bulk creation (20 services), partial deletion, verification
+│   ├── fixtures/                         # Test data
+│   │   ├── basicFlow.json                    # Default Service/Route config
+│   │   ├── kongManager.json                  # Kong connection config
+│   │   ├── gatewayService.json               # Service-specific test data
+│   │   └── serviceParametersCheck.json       # Service creation page parameter validation data
 │   ├── support/
-│   │   ├── commands.js                # Custom commands (incl. Kong API)
-│   │   ├── e2e.js                     # Global setup, generateRandomId
-│   │   ├── services/                  # Business logic
-│   │   │   ├── gateway_service_business.js
-│   │   │   └── route_business.js
-│   │   └── pages/                     # Page Objects
-│   ├── reports/                       # Mochawesome report output
-│   └── screenshots/                   # Failure screenshots
+│   │   ├── commands.js                       # Custom Cypress commands (Kong Admin API wrappers)
+│   │   ├── e2e.js                            # Global setup, error handling, utilities, after-spec cleanup
+│   │   ├── services/                         # Business logic layer
+│   │   │   ├── gateway_service_business.js       # Service operations (create, delete, navigate, verify)
+│   │   │   └── route_business.js                 # Route operations (create, delete, navigate, verify)
+│   │   └── pages/                            # Page Object Model
+│   │       ├── gateway_service_main_page.js      # Service list page
+│   │       ├── gateway_service_new_page.js       # Service creation page
+│   │       ├── gateway_service_detail_page.js    # Service detail page
+│   │       ├── route_main_page.js                # Route list page
+│   │       ├── route_new_page.js                 # Route creation page
+│   │       └── route_detail_page.js              # Route detail page
+│   ├── reports/                          # Mochawesome HTML/JSON reports
+│   └── screenshots/                      # Failure screenshots
+├── docker/
+│   └── docker-compose.yml                # Kong + PostgreSQL Docker setup
 ├── .github/workflows/
-│   └── cypress.yaml                   # CI config (Chrome, Firefox, Edge)
-├── .vscode/
-│   └── launch.json                    # VS Code debug config
-└── cypress.config.js
+│   └── cypress.yaml                      # CI config (Chrome, Firefox, Edge)
+├── run-e2e.sh                            # One-click run script (Linux)
+├── run-e2e-mac.sh                        # One-click run script (macOS)
+├── run-e2e.bat                           # One-click run script (Windows)
+├── cypress.config.js                     # Cypress configuration
+└── package.json
 ```
 
-## Installation
+## Quick Start
+
+### Option 1: One-Click Run Scripts
+
+These scripts handle everything: git pull, npm install, start Kong via Docker, run tests, and stop Docker.
+
+**Linux (Ubuntu/Debian):**
+```bash
+chmod +x run-e2e.sh
+./run-e2e.sh
+```
+
+**macOS:**
+```bash
+chmod +x run-e2e-mac.sh
+./run-e2e-mac.sh
+```
+
+**Windows:**
+```cmd
+run-e2e.bat
+```
+
+All scripts support `--spec` and `--browser` options (see [Run Scripts](#run-scripts) for details).
+
+### Option 2: Manual Setup
 
 ```bash
+# 1. Install dependencies
 npm ci
+
+# 2. Start Kong via Docker
+cd docker && docker compose up -d && cd ..
+
+# 3. Wait for Kong to be ready
+curl http://localhost:8001/status
+
+# 4. Run tests
+npx cypress run
+
+# 5. Stop Kong when done
+cd docker && docker compose down && cd ..
 ```
 
 ## Configuration
 
-### 1. Kong Connection Config
+### Kong Connection Config
 
 Edit `cypress/fixtures/kongManager.json`:
 
@@ -59,134 +110,253 @@ Edit `cypress/fixtures/kongManager.json`:
   "port": 8002,
   "serverPort": 8000,
   "adminPort": 8001,
+  "httpsServerPort": 8443,
+  "httpsAdminPort": 8444,
   "protocol": "http",
   "workspace": "default",
   "serverBaseURL": "http://localhost:8002",
-  "adminURL": "http://localhost:8001"
+  "adminURL": "http://localhost:8001",
+  "httpsServerBaseURL": "https://localhost:8443",
+  "httpsAdminURL": "https://localhost:8444"
 }
 ```
 
 | Field | Description |
 |-------|-------------|
 | `host` / `port` | Kong Manager UI address |
-| `adminPort` | Kong Admin API port (create/delete Service, Route) |
-| `serverPort` | Kong Proxy port (verify Route reachability) |
+| `adminPort` | Kong Admin API port (for CRUD operations on Services and Routes) |
+| `serverPort` | Kong Proxy port (for verifying Route reachability) |
+| `httpsServerPort` | Kong HTTPS Proxy port (for protocol-related tests) |
+| `httpsAdminPort` | Kong HTTPS Admin API port |
 | `workspace` | Kong workspace name |
-| `adminURL` | Admin API full URL (preferred, avoids URL parsing issues) |
+| `adminURL` | Admin API full URL (preferred over host:port composition) |
 
-### 2. Base URL
+### Base URL
 
-`cypress.config.js` sets `baseUrl: 'http://localhost:8002'`. To override, set the environment variable:
+`cypress.config.js` sets `baseUrl: 'http://localhost:8002'` (Kong Manager UI). To override:
 
 **Windows (PowerShell):**
 ```powershell
-$env:CYPRESS_BASE_URL = 'http://localhost:8002'
+$env:CYPRESS_BASE_URL = 'http://your-kong-manager:8002'
 ```
 
 **Linux/macOS:**
 ```bash
-export CYPRESS_BASE_URL='http://localhost:8002'
+export CYPRESS_BASE_URL='http://your-kong-manager:8002'
 ```
 
-### 3. Test Data
+### Test Data
 
-`cypress/fixtures/basicFlow.json` defines default Service and Route configuration. Adjust as needed.
+`cypress/fixtures/basicFlow.json` defines the default Service and Route configuration used across tests. Adjust upstream URL, paths, hosts, methods, etc. as needed.
 
 ## Running Tests
 
-| Command | Description |
-|---------|-------------|
-| `npm run cypress:open` | Open Cypress interactive runner |
-| `npm run cypress:run` | Run headless |
-| `npm run cypress:chrome` | Run with Chrome |
-| `npm run test:e2e` | Same as `cypress:run` |
-| `npm run test:e2e:report` | Run with Mochawesome report |
-| `npm run test:ci` | CI mode (JUnit report) |
-
-## Custom Commands (Kong API)
-
-`cypress/support/commands.js` provides these Kong Admin API commands:
+### npm Scripts
 
 | Command | Description |
 |---------|-------------|
-| `cy.createServiceViaAPI(serviceConfig)` | Create Service, returns response |
-| `cy.createRouteViaAPI(routeConfig)` | Create Route (routeConfig must include `service` name or ID) |
-| `cy.updateRouteViaAPI(routeId, routeUpdates)` | Update Route |
-| `cy.deleteServiceViaAPI(serviceNameOrId)` | Delete Service |
-| `cy.deleteRouteViaAPI(routeNameOrId)` | Delete Route |
-| `cy.shouldRouteWorksCorrectly(routeURL, options)` | Verify Route returns 200, returns response |
-| `cy.shouldRouteNotWorks(routeURL, options)` | Verify Route returns 404/426/5xx, returns response |
+| `npm run cypress:open` | Open Cypress interactive runner (GUI) |
+| `npm run cypress:run` | Run all tests headless (Electron) |
+| `npm run cypress:chrome` | Run all tests with Chrome |
+| `npm run test:e2e` | Alias for `cypress:run` |
+| `npm run test:e2e:report` | Run with Mochawesome HTML report |
+| `npm run test:ci` | CI mode with JUnit XML report |
 
-### shouldRouteWorksCorrectly / shouldRouteNotWorks Options
+### Run Specific Tests
 
-Both accept an optional `options` object:
+```bash
+# Single spec file
+npx cypress run --spec "cypress/e2e/route/route_create.cy.js"
+
+# All specs in a folder
+npx cypress run --spec "cypress/e2e/gateway_service/*.cy.js"
+
+# Multiple spec files
+npx cypress run --spec "cypress/e2e/route/route_create.cy.js,cypress/e2e/route/route_parameters_match.cy.js"
+
+# With a specific browser
+npx cypress run --spec "cypress/e2e/route/*.cy.js" --browser chrome
+```
+
+### Run Scripts
+
+All run scripts accept `--spec` and `--browser` flags, and support `--help` for usage info.
+
+| Script | Platform | Description |
+|--------|----------|-------------|
+| `./run-e2e.sh` | Linux (Ubuntu/Debian) | Full setup including dependency installation |
+| `./run-e2e-mac.sh` | macOS | Requires Docker Desktop pre-installed |
+| `run-e2e.bat` | Windows | Requires Docker Desktop pre-installed |
+
+**Examples:**
+
+```bash
+# Show help
+./run-e2e.sh --help
+
+# Run all tests (default browser)
+./run-e2e.sh
+
+# Run a single spec file
+./run-e2e.sh --spec "cypress/e2e/route/route_create.cy.js"
+
+# Run all route tests with Chrome
+./run-e2e.sh --spec "cypress/e2e/route/*.cy.js" --browser chrome
+
+# Combine spec and browser
+./run-e2e-mac.sh --spec "cypress/e2e/service_route/*.cy.js" --browser firefox
+
+# Windows: run with Edge
+run-e2e.bat --spec "cypress/e2e/gateway_service/service_create.cy.js" --browser edge
+
+# Linux: skip dependency installation (environment already set up)
+SKIP_INSTALL=1 ./run-e2e.sh --spec "cypress/e2e/route/route_create.cy.js"
+```
+
+## Test Suites
+
+### Gateway Service Tests
+
+#### `service_create.cy.js`
+Creates Gateway Services via the Kong Manager UI and verifies creation through the Admin API.
+- **create gateway service with full url** — Fills in a full upstream URL, verifies creation, and toggles the service enabled/disabled status.
+- **create gateway service with separate url component** — Fills in protocol, host, port, and path separately, then verifies creation.
+
+#### `service_new_grid.cy.js`
+Validates that the Service creation page displays the correct form fields and parameters.
+
+### Route Tests
+
+#### `route_create.cy.js`
+Creates Routes via the Kong Manager UI from different entry points and verifies reachability. Service is created via API, Route via UI.
+- **create basic route from routes page** — Creates a basic Route from the Routes list page, verifies it appears in the list and works (200).
+- **verify the service cannot be deleted with routes** — Attempts to delete a Service that still has Routes, verifies the error message is shown, then cancels.
+- **create advanced route from routes page** — Creates a Route with multiple paths, hosts, and protocol settings, verifies each path/host combination works.
+- **create two routes for a service from service detail page** — Creates a Service via UI, then adds two Routes from the Service detail page, verifies both work.
+
+#### `route_parameters_match.cy.js`
+Validates Route parameter behaviors via the Admin API. All Routes are created programmatically.
+- **strip_path** — Verifies `strip_path=false` preserves the route path prefix; `strip_path=true` strips it before forwarding upstream.
+- **methods** — Verifies Route only accepts configured HTTP methods (GET, POST) and rejects others (PUT).
+- **hosts** — Verifies Route matches only configured host headers and rejects unmatched hosts.
+- **protocols** — Verifies Route works over HTTP and HTTPS; removing HTTP returns 426 Upgrade Required.
+- **https_redirect_status_code** — Cycles through 426, 301, 302, 307, 308 and verifies correct redirect status and headers (Location header, Connection: Upgrade).
+- **preserve_host** — Verifies `preserve_host=true` forwards the client Host header to upstream; `preserve_host=false` replaces it.
+
+### Combined Service + Route Tests
+
+#### `service_route_basic_flow.cy.js`
+Full UI lifecycle test:
+1. Create a Gateway Service via UI
+2. Create a Route via UI
+3. Verify the Route works (200 OK)
+4. Delete the Route via UI
+5. Delete the Service via UI
+6. Verify the Route returns 404
+
+#### `multi_services_routes.cy.js`
+Bulk creation and partial deletion test via Admin API.
+- **create 20 services, each service has a route** — Creates 20 Service/Route pairs and verifies each Route returns 200 immediately after creation.
+- **should all routes work correctly** — Re-verifies all 20 Routes still return 200.
+- **delete 5 routes, verify deleted routes stop working and remaining routes still work** — Deletes 5 Routes, verifies they return 404/426/5xx, then verifies the remaining 15 Routes still return 200.
+
+## Custom Commands (Kong Admin API)
+
+Defined in `cypress/support/commands.js`:
+
+| Command | Description |
+|---------|-------------|
+| `cy.createServiceViaAPI(serviceConfig)` | Create a Service; returns response (`res.body.id` for service ID) |
+| `cy.deleteServiceViaAPI(serviceNameOrId)` | Delete a Service (204 on success) |
+| `cy.createRouteViaAPI(routeConfig)` | Create a Route (`routeConfig` must include `name` and `service`) |
+| `cy.updateRouteViaAPI(routeNameOrId, updates)` | PATCH update a Route |
+| `cy.deleteRouteViaAPI(routeNameOrId)` | Delete a Route (204 on success) |
+| `cy.shouldRouteWorksCorrectly(url, options)` | Retry until Route returns 200 (3-min timeout) |
+| `cy.shouldRouteNotWorks(url, options)` | Retry until Route returns 404/426/5xx (3-min timeout) |
+
+### `shouldRouteWorksCorrectly` / `shouldRouteNotWorks` Options
 
 ```javascript
 {
-  method: 'GET',           // HTTP method, default GET
+  method: 'GET',           // HTTP method (default: GET)
   headers: {},             // Request headers, e.g. { Host: 'api.example.com' }
-  https_redirect_status_code: 426  // shouldRouteNotWorks only: expected status for HTTPS upgrade
 }
 ```
 
-**shouldRouteNotWorks** treats these as success: 404, 426, 5xx (500–599). Use `.then((res) => res)` to get the response.
+Both commands use `cypress-recurse` to retry with a 5-second interval for up to 3 minutes. This handles the propagation delay after Route creation or update.
+
+**Examples:**
 
 ```javascript
-// Basic usage
+// Verify a route returns 200
 cy.shouldRouteWorksCorrectly('http://localhost:8000/anything');
-cy.shouldRouteNotWorks('http://localhost:8000/unknown-path').then((res) => expect(res.status).to.eq(404));
 
-// With options
+// Verify with specific method and headers
 cy.shouldRouteWorksCorrectly(url, { method: 'POST', headers: { Host: 'api.example.com' } });
-cy.shouldRouteNotWorks(url, { headers: { Host: 'api.example.com' } });
+
+// Verify a route is unreachable (404/426/5xx)
+cy.shouldRouteNotWorks('http://localhost:8000/deleted-path');
+
+// Chain to inspect the response
+cy.shouldRouteNotWorks(url).then((res) => {
+  expect(res.status).to.eq(404);
+});
 ```
 
-## Test Flows
+## Architecture
 
-### service_route_basic_flow.cy.js
-Full UI flow: Create Service → Create Route → Verify Route works → Delete Route → Delete Service → Verify 404.
+```
+Test Spec (.cy.js)
+    │
+    ├── Business Layer (services/)
+    │   ├── GatewayServiceBusiness   — orchestrates Service UI flows
+    │   └── RouteBusiness            — orchestrates Route UI flows
+    │       │
+    │       └── Page Object Layer (pages/)
+    │           ├── GatewayServiceMainPage / NewPage / DetailPage
+    │           └── RouteMainPage / NewPage / DetailPage
+    │
+    └── Custom Commands (commands.js)
+        └── Kong Admin API wrappers (create, update, delete, verify)
+```
 
-### route_parameters_match.cy.js
-Creates Service and Route via API, verifies `strip_path` behavior:
-- strip_path=true: Path stripped before forwarding, request succeeds (200)
-- strip_path=false: Path preserved, returns 404/426/5xx when path doesn't match
+- **Page Objects** encapsulate UI selectors and low-level interactions.
+- **Business Layer** composes page object methods into meaningful workflows (e.g., "create a service with full URL" = navigate + fill form + submit + verify).
+- **Custom Commands** provide reusable Kong Admin API operations available in any test via `cy.<command>()`.
 
-### route_create.cy.js
-Creates Service (API) and Route (UI), verifies Route creation and reachability.
+## Global Utilities and Cleanup
 
-### service_create.cy.js
-Creates Gateway Service via UI, verifies creation success.
+Defined in `cypress/support/e2e.js` and available in all tests:
 
-## Run Scripts
+| Function | Description |
+|----------|-------------|
+| `generateRandomId()` | Returns a unique string like `1710736543210-8321` (timestamp + random digits) |
+| `generateUUID()` | Returns an 8-character hex string from `crypto.randomUUID()` |
 
-| Script | Platform |
-|--------|----------|
-| `./run-e2e.sh` | Linux (Ubuntu/Debian) |
-| `./run-e2e-mac.sh` | macOS |
-| `run-e2e.bat` | Windows |
+### Automatic After-Spec Cleanup
 
-Scripts: git pull → npm ci → start Kong (Docker) → run tests → stop Docker. Set `SKIP_INSTALL=1` to skip dependency installation on Linux.
+A global `after()` hook runs after each spec file completes. It reads the name prefixes from `cypress/fixtures/basicFlow.json` (`service.name` and `route.name`), then deletes all Routes and Services whose names start with those prefixes via the Kong Admin API. This ensures leftover test data does not accumulate across runs, even if individual tests fail before their own `after()` hooks execute.
 
 ## Reports
 
-- **Mochawesome**: `cypress/reports/` (HTML + JSON)
-- **Screenshots**: `cypress/screenshots/` (on failure)
-- **Videos**: Enable in `cypress.config.js` if needed
-
-## Debugging
-
-Use `.vscode/launch.json` in VS Code to debug Cypress tests. Select the matching debug config and press F5.
+| Type | Location | Generated By |
+|------|----------|-------------|
+| Mochawesome HTML | `cypress/reports/` | `npm run test:e2e:report` |
+| JUnit XML | `cypress/reports/junit/` | `npm run test:ci` |
+| Screenshots | `cypress/screenshots/` | Automatic on test failure |
+| Videos | `cypress/videos/` | Enable `video: true` in `cypress.config.js` |
 
 ## CI (GitHub Actions)
 
-- **Triggers**: `push` and `pull_request` on `main` and `develop`
-- **Browsers**: Chrome, Firefox, Edge
-- **Flow**: Start Kong via `docker/docker-compose`, run Cypress tests
-- **Artifacts**: Reports, screenshots, videos (on failure) uploaded
+Configured in `.github/workflows/cypress.yaml`:
 
-**Note**: CI requires `docker/` directory and `docker-compose` configuration.
+- **Triggers**: `push` and `pull_request` on `main` and `test`
+- **Browsers**: Chrome, Firefox, Edge (matrix strategy)
+- **Flow**: Start Kong via `docker/docker-compose.yml` → run Cypress tests → upload artifacts
+- **Artifacts**: Reports, screenshots, and videos (on failure) are uploaded
 
 ## Notes
 
-- Implement `cy.login()` in `cypress/support/commands.js` if authentication is required
-- If selectors use `data-testid`, update `cypress/support/pages/` accordingly
+- Implement `cy.login()` in `cypress/support/commands.js` if Kong Manager requires authentication.
+- Page objects use CSS selectors; update `cypress/support/pages/` if selectors change across Kong versions.
+- The `chromeWebSecurity: false` setting in `cypress.config.js` allows cross-origin requests during tests.

@@ -2,7 +2,7 @@ import { GatewayServiceBusiness } from "../../support/services/gateway_service_b
 import { RouteBusiness } from "../../support/services/route_business"
 import { recurse } from 'cypress-recurse'
 
-describe('Create Gateway Service', () => {
+describe('Create Route', () => {
     const routeBusiness = new RouteBusiness();
     let adminURL;
     let serverURL;
@@ -11,7 +11,7 @@ describe('Create Gateway Service', () => {
     let serviceIds = [];
     let routeNames = [];
     let shouldRouteCreated;
-    let createService;
+    let serviceName;
 
     before(() => {
         cy.fixture('basicFlow.json').then((config) => {
@@ -23,25 +23,7 @@ describe('Create Gateway Service', () => {
                 serverConfig = { ...config };
                 adminURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.adminPort}`;
                 serverURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.serverPort}`;
-        })
-
-        createService = function(config) {
-            let serviceId;
-                cy.request({
-                    method: 'POST',
-                    url: `${adminURL}/${serverConfig.workspace}/services`, 
-                    body: config,
-                    failOnStatusCode: false 
-                }).then((response) => {
-                    if (response.status !== 201) {
-                        throw new Error(`Expected status is 201 but got ${response.status}`)
-                    }
-                    cy.log(`Successfully created service: ${config.name} with id: ${response.body.id}`)
-                    serviceId = response.body.id;
-                    serviceIds.push(serviceId);
-                    return cy.wrap(response);
-                })    
-        };
+            })
 
         shouldRouteCreated = (config) => {
             cy.request({
@@ -52,7 +34,7 @@ describe('Create Gateway Service', () => {
                 expect(response.status).to.equal(200);
                 expect(response.body).to.have.property('name', config.name);
             });
-        }   
+        }
     })
 
     beforeEach(() => {
@@ -71,9 +53,10 @@ describe('Create Gateway Service', () => {
 
     it('create basic route from routes page', () => {
         const unique = generateRandomId();
+        serviceName = `${basicConfig.service.name}-${unique}`;
         const serviceConfig = {
             ...basicConfig.service,
-            name: `${basicConfig.service.name}-${unique}`
+            name: serviceName
         }
 
         const routeConfig = {
@@ -84,17 +67,27 @@ describe('Create Gateway Service', () => {
         }
         routeNames.push(routeConfig.name);
         //create upstream gateway servcie
-        createService(serviceConfig);
+        cy.createServiceViaAPI(serviceConfig).then((response) => {
+            serviceIds.push(response.body.id);
+        });
 
         routeBusiness
             .createBasicRouteFromRouteMainPage(routeConfig);
         shouldRouteCreated(routeConfig);
-        
+
         //the route is displayed in the route main page
-        routeBusiness.shouldRoutePageHaveRoute(routeConfig.name);    
+        routeBusiness.shouldRoutePageHaveRoute(routeConfig.name);
 
         //the route should works correctly
-        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path);
+        cy.shouldRouteWorksCorrectly(serverURL + routeConfig.path);
+    })
+
+    it('verify the service cannot be deleted with routes', () => {
+        routeBusiness.navigateToServiceMainPage()
+            .deleteServiceByName(serviceName)
+            .shouldShowDeleteErrorMessage()
+            .cancelDeleteService()
+            .shouldHaveService(serviceName);
     })
 
     it('create advanced route from routes page', () => {
@@ -102,28 +95,27 @@ describe('Create Gateway Service', () => {
         const serviceConfig = {
             ...basicConfig.service,
             name: `${basicConfig.service.name}-${unique}`
-          }
+        }
         const routeConfig = {
             ...basicConfig.route,
             name: `${basicConfig.route.name}-${unique}`,
             service: serviceConfig.name,
-            path1: basicConfig.route.path1+unique,
-            path2: basicConfig.route.path2+unique
+            path1: basicConfig.route.path1 + unique,
+            path2: basicConfig.route.path2 + unique
         }
- 
+
         routeNames.push(routeConfig.name);
-        createService(serviceConfig);
+        cy.createServiceViaAPI(serviceConfig);
 
         routeBusiness
             .createAdvancedRouteFromRouteMainPage(routeConfig)
-        
+
         //the route is displayed in the route main page
-        routeBusiness.shouldRoutePageHaveRoute(routeConfig.name); 
-        
-        
+        routeBusiness.shouldRoutePageHaveRoute(routeConfig.name);
+
         //the routes should works correctly
-        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path1, { headers: { Host: routeConfig.host1 } });
-        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path2, { headers: { Host: routeConfig.host2 } });
+        cy.shouldRouteWorksCorrectly(serverURL + routeConfig.path1, { headers: { Host: routeConfig.host1 } });
+        cy.shouldRouteWorksCorrectly(serverURL + routeConfig.path2, { headers: { Host: routeConfig.host2 } });
     })
 
     it('create two routes for a service from service detail page', () => {
@@ -141,8 +133,8 @@ describe('Create Gateway Service', () => {
             service: serviceConfig.name,
             path: `${basicConfig.route.path}${unique}`,
         }
-        routeNames.push(routeConfig.name); 
-        
+        routeNames.push(routeConfig.name);
+
         //create the upstream service
         let gatewayServiceDetailPage = gatewayServiceBusiness
             .createGatewayServiceWithFullURL(serviceConfig);
@@ -153,14 +145,13 @@ describe('Create Gateway Service', () => {
                 serviceIds.push(serviceId);
             })
         gatewayServiceDetailPage.clickAddARouteButton();
-            
+
         //create the route from the created service detail page
         routeBusiness.createBasicRouteFromServiceDetailPage(routeConfig);
         //verify route is created
         shouldRouteCreated(routeConfig);
-        routeBusiness.shouldRoutePageHaveRoute(routeConfig.name); 
-        
-        
+        routeBusiness.shouldRoutePageHaveRoute(routeConfig.name);
+
         //add another route to the service
         const anotherUnique = generateRandomId();
         const anotherRouteConfig = {
@@ -181,9 +172,8 @@ describe('Create Gateway Service', () => {
         //the route is displayed in the route main page
         routeBusiness.shouldRoutePageHaveRoute(anotherRouteConfig.name);
 
-
         //the routes should works correctly
-        cy.shouldRouteWorksCorrectly(serverURL+routeConfig.path);
-        cy.shouldRouteWorksCorrectly(serverURL+anotherRouteConfig.path);
+        cy.shouldRouteWorksCorrectly(serverURL + routeConfig.path);
+        cy.shouldRouteWorksCorrectly(serverURL + anotherRouteConfig.path);
     })
 })

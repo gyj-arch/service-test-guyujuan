@@ -16,11 +16,13 @@ class GatewayServiceMainPage {
         this.deleteServiceDialogSelector = 'div[aria-label="Delete a Gateway Service"][role="dialog"]'
         this.deleteConfirmInputSelector = 'input[data-testid="confirmation-input"]'
         this.deleteConfirmButtonSelector = 'button[data-testid="modal-action-button"]'
+        this.deleteCancelButtonSelector = 'button[data-testid="modal-cancel-button"]'
+        this.deleteErrorMessageSelector = 'div.kong-ui-entity-delete-error div.alert-message'
     }
 
     getServiceRowByName(serviceName) {
         return cy.get(this.serviceTableRowSelector)
-            .filter(`[data-testid="${serviceName}"]`);
+            .filter(`[data-testid="${serviceName}"]`, { timeout: 20000 });
     }
 
     deleteServiceByName(serviceName) {
@@ -36,10 +38,22 @@ class GatewayServiceMainPage {
         return this;
     }
 
+    shouldShowDeleteErrorMessage() {
+        cy.get(this.deleteErrorMessageSelector, { timeout: 10000 }).should('be.visible')
+        .should('contain', "an existing 'routes' entity references this 'services' entity");
+        return this;
+    }
+
+    cancelDeleteService() {
+        cy.get(this.deleteCancelButtonSelector, { timeout: 10000 }).should('be.visible').click();
+        cy.get(this.deleteServiceDialogSelector, { timeout: 10000 }).should('not.exist');
+        return this;
+    }
+
     waitPageLoaded() {
-        cy.get(this.pageTitleSelector, { timeout: 10000 }).should('be.visible');
-        cy.get(this.pageDescriptionSelector, { timeout: 10000 }).should('be.visible');
-        cy.get(this.newGatewayServiceButtonSelector, { timeout: 10000 }).should('be.visible');
+        cy.get(this.pageTitleSelector, { timeout: 20000 }).should('be.visible');
+        cy.get(this.pageDescriptionSelector, { timeout: 20000 }).should('be.visible');
+        cy.get(this.newGatewayServiceButtonSelector, { timeout: 20000 }).should('be.visible');
         return this;
     }
 

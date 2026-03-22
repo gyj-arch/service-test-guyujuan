@@ -1,5 +1,5 @@
-import { GatewayServiceBusiness } from "../support/services/gateway_service_business"
-import { RouteBusiness } from "../support/services/route_business"
+import { GatewayServiceBusiness } from "../../support/services/gateway_service_business"
+import { RouteBusiness } from "../../support/services/route_business"
 
 describe('Add Service and Route and then delete them', () => {
   const gatewayServiceBusiness = new GatewayServiceBusiness()
@@ -10,30 +10,28 @@ describe('Add Service and Route and then delete them', () => {
   let serverConfig;
   let serviceId;
   let routeId;
-  let adminURL;
   let serverURL;
 
   before(() => {
     cy.fixture('basicFlow.json')
       .then((config) => {
-      serviceConfig = {
-        ...config.service,
-        name: `${config.service.name}-${unique}`
-      }
-      routeConfig = {
-        ...config.route,
-        name: `${config.route.name}-${unique}`,
-        service: serviceConfig.name,
-        path: `${config.route.path}${unique}`
-      };
-    })
+        serviceConfig = {
+          ...config.service,
+          name: `${config.service.name}-${unique}`
+        }
+        routeConfig = {
+          ...config.route,
+          name: `${config.route.name}-${unique}`,
+          service: serviceConfig.name,
+          path: `${config.route.path}${unique}`
+        };
+      })
 
     cy.fixture('kongManager.json')
       .then((config) => {
-      serverConfig = { ...config };
-      adminURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.adminPort}`;
-      serverURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.serverPort}`;
-    })
+        serverConfig = { ...config };
+        serverURL = `${serverConfig.protocol}://${serverConfig.host}:${serverConfig.serverPort}`;
+      })
   })
 
   after(() => {
@@ -73,7 +71,7 @@ describe('Add Service and Route and then delete them', () => {
   it('should route not works when the route has been deleted', () => {
     const routeURL = `${serverURL}${routeConfig.path}`;
     cy.log(`Making request to ${routeURL} to verify the route has been deleted`);
-    
+
     // Make a request to the route we just created
     cy.shouldRouteNotWorks(routeURL);
   })

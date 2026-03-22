@@ -5,9 +5,57 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+usage() {
+  cat <<'USAGE'
+==========================================
+  Kong Gateway Manager E2E Test Script
+==========================================
+
+Usage:
+  ./run-e2e.sh [OPTIONS]
+
+Options:
+  --spec <pattern>    Cypress spec file or glob pattern to run
+  --browser <name>    Browser to use (chrome, firefox, edge, electron)
+  --help, -h          Show this help message
+
+Examples:
+  # Run all tests with default browser (Electron)
+  ./run-e2e.sh
+
+  # Run a single spec file
+  ./run-e2e.sh --spec "cypress/e2e/route/route_create.cy.js"
+
+  # Run all specs under a folder using glob
+  ./run-e2e.sh --spec "cypress/e2e/route/*.cy.js"
+
+  # Run with Chrome browser
+  ./run-e2e.sh --browser chrome
+
+  # Combine spec and browser
+  ./run-e2e.sh --spec "cypress/e2e/service_route/*.cy.js" --browser firefox
+
+  # Skip dependency installation (when environment is already set up)
+  SKIP_INSTALL=1 ./run-e2e.sh --spec "cypress/e2e/route/route_create.cy.js"
+
+USAGE
+}
+
 echo "=========================================="
 echo "  Kong Gateway Manager E2E Test Script"
 echo "=========================================="
+
+# Parse arguments: --spec <file>, --browser <name>
+SPEC=""
+BROWSER=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --help|-h) usage; exit 0 ;;
+    --spec)    SPEC="$2"; shift 2 ;;
+    --browser) BROWSER="$2"; shift 2 ;;
+    *)         shift ;;
+  esac
+done
 
 # Detect if Ubuntu/Debian
 detect_os() {
@@ -86,8 +134,16 @@ run_tests() {
   fi
   echo "Kong is ready"
 
+  # Build cypress run command with optional --spec and --browser
   echo "=== 7. Run Cypress tests ==="
-  npm run cypress:run
+  CYPRESS_ARGS=""
+  if [[ -n "$SPEC" ]]; then
+    CYPRESS_ARGS="$CYPRESS_ARGS --spec $SPEC"
+  fi
+  if [[ -n "$BROWSER" ]]; then
+    CYPRESS_ARGS="$CYPRESS_ARGS --browser $BROWSER"
+  fi
+  npx cypress run $CYPRESS_ARGS
   TEST_EXIT=$?
 
   echo "=== 8. Stop Docker services ==="
@@ -110,4 +166,4 @@ main() {
   run_tests
 }
 
-main "$@"
+main
