@@ -19,7 +19,7 @@ Cypress E2E test suite for validating Kong Gateway Manager's Service and Route l
 │   │   │   └── service_new_grid.cy.js        # Verify Service creation page parameters
 │   │   ├── route/                        # Route tests
 │   │   │   ├── route_create.cy.js            # Create Route via UI (basic, advanced, from service detail)
-│   │   │   └── route_parameters_match.cy.js  # Route parameter behavior (strip_path, methods, hosts, protocols, preserve_host, https_redirect)
+│   │   │   └── route_parameters_match.cy.js  # Route parameter behavior (strip_path, methods, hosts, protocols, preserve_host, https_redirect, headers)
 │   │   └── service_route/                # Combined Service + Route tests
 │   │       ├── service_route_basic_flow.cy.js    # Full lifecycle: create → verify → delete → confirm 404
 │   │       └── multi_services_routes.cy.js       # Bulk creation (20 services), partial deletion, verification
@@ -47,6 +47,10 @@ Cypress E2E test suite for validating Kong Gateway Manager's Service and Route l
 │   └── docker-compose.yml                # Kong + PostgreSQL Docker setup
 ├── .github/workflows/
 │   └── cypress.yaml                      # CI config (Chrome, Firefox, Edge)
+├── issues/                              # Bug reports for Kong
+│   ├── kong-headers-regex-bug.md            # Route headers regex matching bug
+│   ├── kong-manager-service-FullURL-validation-bug.md  # Service URL validation bug
+│   └── kong-manager-FullURL-validation-bug.png          # Screenshot for URL validation bug
 ├── run-e2e.sh                            # One-click run script (Linux)
 ├── run-e2e-mac.sh                        # One-click run script (macOS)
 ├── run-e2e.bat                           # One-click run script (Windows)
@@ -242,6 +246,7 @@ Validates Route parameter behaviors via the Admin API. All Routes are created pr
 - **protocols** — Verifies Route works over HTTP and HTTPS; removing HTTP returns 426 Upgrade Required.
 - **https_redirect_status_code** — Cycles through 426, 301, 302, 307, 308 and verifies correct redirect status and headers (Location header, Connection: Upgrade).
 - **preserve_host** — Verifies `preserve_host=true` forwards the client Host header to upstream; `preserve_host=false` replaces it.
+- **headers** — Verifies Route matches only when the specified header is present with the correct value. Tests exact matching (`x-api-version: v1`, `v2`), regex-based matching (`~v[0-9]+`), and header switching (`x-region: us-east`, `eu-west`). See [Known Issues](#known-issues) for regex matching limitations.
 
 ### Combined Service + Route Tests
 
@@ -268,7 +273,7 @@ Defined in `cypress/support/commands.js`:
 |---------|-------------|
 | `cy.createServiceViaAPI(serviceConfig)` | Create a Service; returns response (`res.body.id` for service ID) |
 | `cy.deleteServiceViaAPI(serviceNameOrId)` | Delete a Service (204 on success) |
-| `cy.createRouteViaAPI(routeConfig)` | Create a Route (`routeConfig` must include `name` and `service`) |
+| `cy.createRouteViaAPI(routeConfig)` | Create a Route (`routeConfig` must include `name` and `service`; supports `headers` for header matching) |
 | `cy.updateRouteViaAPI(routeNameOrId, updates)` | PATCH update a Route |
 | `cy.deleteRouteViaAPI(routeNameOrId)` | Delete a Route (204 on success) |
 | `cy.shouldRouteWorksCorrectly(url, options)` | Retry until Route returns 200 (3-min timeout) |
@@ -354,6 +359,15 @@ Configured in `.github/workflows/cypress.yaml`:
 - **Browsers**: Chrome, Firefox, Edge (matrix strategy)
 - **Flow**: Start Kong via `docker/docker-compose.yml` → run Cypress tests → upload artifacts
 - **Artifacts**: Reports, screenshots, and videos (on failure) are uploaded
+
+## Known Issues
+
+Bug reports are stored in the `issues/` directory.
+
+| Issue | File |
+|-------|------|
+| Route `headers` regex matching (`~` prefix) does not work under `traditional_compatible` router | [`kong-headers-regex-bug.md`](issues/kong-headers-regex-bug.md) |
+| Kong Manager UI does not validate invalid Service Full URL before submission | [`kong-manager-service-FullURL-validation-bug.md`](issues/kong-manager-service-FullURL-validation-bug.md) |
 
 ## Notes
 

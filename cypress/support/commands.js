@@ -176,6 +176,9 @@ Cypress.Commands.add('createRouteViaAPI', (routeConfig) => {
   if (routeConfig.path_handling) {
     body.path_handling = routeConfig.path_handling;
   }
+  if (routeConfig.headers && typeof routeConfig.headers === 'object') {
+    body.headers = routeConfig.headers;
+  }
   return cy.fixture('kongManager.json').then((server) => {
     const base = `${server.protocol}://${server.host}:${server.adminPort}`;
     const url = `${base.replace(/\/$/, '')}/${server.workspace || 'default'}/routes`;

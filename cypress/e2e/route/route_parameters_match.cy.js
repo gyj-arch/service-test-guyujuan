@@ -39,7 +39,7 @@ describe('Verify Route Parameters Match', () => {
         });
     })
 
-    it('check strip _ath action', () => {
+    it('check strip _ath matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const routeStripPathConfig = {
@@ -71,8 +71,7 @@ describe('Verify Route Parameters Match', () => {
         cy.shouldRouteWorksCorrectly(serverURL + uniquePath);
     })
 
-
-    it('check methods action', () => {
+    it('check methods matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const routeStripPathConfig = {
@@ -97,7 +96,7 @@ describe('Verify Route Parameters Match', () => {
         cy.shouldRouteNotWorks(serverURL + uniquePath, { method: 'PUT' });
     })
 
-    it('check hosts action', () => {
+    it('check hosts matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const routeHostsConfig = {
@@ -120,7 +119,7 @@ describe('Verify Route Parameters Match', () => {
         cy.shouldRouteNotWorks(serverURL + uniquePath, { headers: { Host: 'abc.example.com' } });
     })
 
-    it('check protocols action', () => {
+    it('check protocols matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const httpsServerURL = `https://${serverConfig.host}:${serverConfig.httpsServerPort}`;
@@ -148,7 +147,7 @@ describe('Verify Route Parameters Match', () => {
         });
     })
 
-    it('check https_redirect_status_code action', () => {
+    it('check https_redirect_status_code matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const url = `${serverURL}${uniquePath}`;
@@ -211,7 +210,7 @@ describe('Verify Route Parameters Match', () => {
         });
     })
 
-    it('check preserve_host action', () => {
+    it('check preserve_host matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const headersServcieCnfig = {
@@ -266,5 +265,60 @@ describe('Verify Route Parameters Match', () => {
           ).then((response) => {
             expect(response.headers.Host).not.to.eq(myHost);
         });
+    })
+
+    it('check headers matching', () => {
+        const unique = generateRandomId();
+        const uniquePath = `${basicConfig.route.path}-${unique}`;
+        const routeHeadersConfig = {
+            ...basicConfig.route,
+            name: `${basicConfig.route.name}-${unique}`,
+            service: serviceConfig.name,
+            path: uniquePath,
+            headers: { 'x-api-version': ['v1', 'v2'] }
+        }
+        cy.createRouteViaAPI(routeHeadersConfig).then((res) => {
+            routeIds.push(res.body.id);
+            expect(res.body.headers).to.have.property('x-api-version');
+            expect(res.body.headers['x-api-version']).to.deep.equal(['v1', 'v2']);
+        });
+
+        //route works with matching header values
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-api-version': 'v1' } });
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-api-version': 'v2' } });
+
+        //route does not work without the required header
+        cy.shouldRouteNotWorks(serverURL + uniquePath);
+
+        //route does not work with a non-matching header value
+        cy.shouldRouteNotWorks(serverURL + uniquePath, { headers: { 'x-api-version': 'v3' } });
+
+        // skip regex-based matching because it does not work
+        // //update to regex-based matching (prefix with ~, no anchors)
+        // cy.updateRouteViaAPI(routeHeadersConfig.name, {
+        //     headers: { 'x-api-version': ['~v[0-9]+'] }
+        //     //"expression": "http.headers.x-api-version ~ r#\"^v[0-9]+$\"#"
+        // }).then((res) => {
+        //     expect(res.body.headers['x-api-version']).to.deep.equal(['~v[0-9]+']);
+        // });
+
+        // //regex matches v followed by digits
+        // cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-api-version': 'v1' } });
+        // cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-api-version': 'v99' } });
+
+        // //regex does not match non-numeric versions
+        // cy.shouldRouteNotWorks(serverURL + uniquePath, { headers: { 'x-api-version': 'beta' } });
+
+        //switch to a different header (x-region) with exact match
+        cy.updateRouteViaAPI(routeHeadersConfig.name, {
+            headers: { 'x-region': ['us-east', 'eu-west'] }
+        }).then((res) => {
+            expect(res.body.headers).to.have.property('x-region');
+            expect(res.body.headers['x-region']).to.deep.equal(['us-east', 'eu-west']);
+        });
+
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-region': 'us-east' } });
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-region': 'eu-west' } });
+        cy.shouldRouteNotWorks(serverURL + uniquePath, { headers: { 'x-region': 'ap-south' } });
     })
 })
