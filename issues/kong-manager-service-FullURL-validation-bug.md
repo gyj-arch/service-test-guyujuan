@@ -54,7 +54,7 @@ A red error banner appears at the bottom of the page:
 
 ## Screenshot
 
-![Kong Manager URL Validation Bug](kong-manager-url-validation-bug.png)
+![Kong Manager URL Validation Bug](kong-manager-FullURL-validation-bug.png)
 
 ## Expected Behavior
 
