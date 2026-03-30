@@ -77,7 +77,7 @@ describe('Create Gateway Service', () => {
             name: `${basicConfig.service.name}-${unique}`
         }
 
-        //create service - getServiceId() 返回 Cypress 链，需用 .then() 获取实际 ID 字符串
+        //create service - getServiceId() 
         gatewayServiceBusiness
             .createGatewayServiceWithEachURLComponent(serviceConfig)
             .getServiceId()
