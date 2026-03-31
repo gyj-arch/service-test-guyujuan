@@ -28,20 +28,6 @@ import { recurse } from 'cypress-recurse';
 
 
 /**
- * Verify route created success notification is visible
- * Finds the toaster that contains the specific route name message among multiple toasters
- * @param {string} routeName - Route name to match in the success message
- * @example
- * cy.shouldRouteCreatedSuccessNotification('my-route')
- */
-Cypress.Commands.add('shouldRouteCreatedSuccessNotification', (routeName) => {
-  const selector = 'div[class*="toaster"][class*="success"][role="alert"]';
-  cy.contains(selector, `Route "${routeName}" successfully created!`, { timeout: 20000 })
-    .scrollIntoView()
-    .should('be.visible');
-});
-
-/**
  * GET TEXT COMMAND
  * @example
  * cy.get('.selector').getText().then(text => { ... })

@@ -3,10 +3,7 @@
 ## Summary
 
 Kong Manager UI's Route Configuration page explicitly instructs users to prefix header values with `~` to enable regex-based matching. However, under the default `traditional_compatible` router, this `~` regex prefix is accepted by the Admin API and stored correctly, but the route **never matches any incoming request**. Exact value matching for the same header works correctly.
-
-Additionally, the `expression` field (which could serve as a workaround) is rejected by the Admin API with `schema violation (expression: unknown field)` under `traditional_compatible` mode.
-
-This means the **UI is actively guiding users toward a non-functional feature**, and **there is no way to perform regex-based header matching** in the default Kong configuration.
+This means the **UI is actively guiding users toward a non-functional feature**.
 
 ## Environment
 
