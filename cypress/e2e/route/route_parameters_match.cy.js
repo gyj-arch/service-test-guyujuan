@@ -39,7 +39,7 @@ describe('Verify Route Parameters Match', () => {
         });
     })
 
-    it('check strip _ath matching', () => {
+    it('check strip_path matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
         const routeStripPathConfig = {
@@ -73,15 +73,24 @@ describe('Verify Route Parameters Match', () => {
 
     it('check methods matching', () => {
         const unique = generateRandomId();
+        const uniqueServiceName = `${basicConfig.service.name}-${unique}`;
+        const serviceConfig = {
+            ...basicConfig.service,
+            url: `http://httpbin.org/anything`,
+            name: uniqueServiceName
+        };
+        cy.createServiceViaAPI(serviceConfig).then((res) => {
+            serviceIds.push(res.body.id);
+        });
         const uniquePath = `${basicConfig.route.path}-${unique}`;
-        const routeStripPathConfig = {
+        const routeMethodsConfig = {
             ...basicConfig.route,
             name: `${basicConfig.route.name}-${unique}`,
-            service: serviceConfig.name,
+            service: uniqueServiceName,
             path: uniquePath,
             methods: ['GET', 'POST']
         }
-        cy.createRouteViaAPI(routeStripPathConfig).then((res) => {
+        cy.createRouteViaAPI(routeMethodsConfig).then((res) => {
             routeIds.push(res.body.id);
             expect(res.body.methods).to.deep.equal(['GET', 'POST']);
         });
@@ -90,7 +99,7 @@ describe('Verify Route Parameters Match', () => {
         cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { method: 'GET' });
 
         //the route works correctly when the  method is POST
-        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { method: 'GET' });
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { method: 'POST' });
 
         //the route does not work when the method is PUT
         cy.shouldRouteNotWorks(serverURL + uniquePath, { method: 'PUT' });
@@ -213,11 +222,11 @@ describe('Verify Route Parameters Match', () => {
     it('check preserve_host matching', () => {
         const unique = generateRandomId();
         const uniquePath = `${basicConfig.route.path}-${unique}`;
-        const headersServcieCnfig = {
+        const headersServcieConfig = {
             name: `${basicConfig.service.name}-${unique}`,
             url: "http://httpbin.org/headers"
         }
-        cy.createServiceViaAPI(headersServcieCnfig).then((res) => {
+        cy.createServiceViaAPI(headersServcieConfig).then((res) => {
             serviceIds.push(res.body.id);
             expect(res.status).to.eq(201);
         });
@@ -226,7 +235,7 @@ describe('Verify Route Parameters Match', () => {
         const routePreserveHostConfig = {
             ...basicConfig.route,
             name: `${basicConfig.route.name}-${unique}`,
-            service: headersServcieCnfig.name,
+            service: headersServcieConfig.name,
             path: uniquePath,
             preserve_host: true
         }
@@ -308,6 +317,20 @@ describe('Verify Route Parameters Match', () => {
 
         // //regex does not match non-numeric versions
         // cy.shouldRouteNotWorks(serverURL + uniquePath, { headers: { 'x-api-version': 'beta' } });
+
+        //update to regex-based matching (prefix with ~*, no anchors)
+        cy.updateRouteViaAPI(routeHeadersConfig.name, {
+            headers: { 'x-api-version': ['~*v[0-9]+'] }
+        }).then((res) => {
+            expect(res.body.headers['x-api-version']).to.deep.equal(['~*v[0-9]+']);
+        });
+
+        //regex matches v followed by digits
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-api-version': 'v1' } });
+        cy.shouldRouteWorksCorrectly(serverURL + uniquePath, { headers: { 'x-api-version': 'v99' } });
+
+        //regex does not match non-numeric versions
+        cy.shouldRouteNotWorks(serverURL + uniquePath, { headers: { 'x-api-version': 'beta' } });
 
         //switch to a different header (x-region) with exact match
         cy.updateRouteViaAPI(routeHeadersConfig.name, {
