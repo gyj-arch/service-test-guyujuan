@@ -25,23 +25,6 @@ class RouteBusiness {
       .waitPageLoaded();
   }
 
-  /**
-   * @param {Object} routeConfig 
-   */
-  // createRoute(routeConfig) {
-  //   this.navigateToRouteMainPage();
-  //   const routeNewPage = this.routeMainPage.clickNewRoute();
-  //   const routeDetailPage = routeNewPage
-  //     .fillName(routeConfig.name)
-  //     .selectService(routeConfig.service)
-  //     .fillPath(routeConfig.path)
-  //     .fillStripPath(routeConfig.stripPath)
-  //     .selectMethod(routeConfig.method)
-  //     .save();
-  //   routeNewPage.verifyRouteCreatedSuccessNotification(routeConfig.name);
-  //   return routeDetailPage;
-  // }
-
   createBasicRouteFromRouteMainPage(routeConfig, serviceName) {
     const routeMainPage = this.navigateToRouteMainPage();;
     const routeNewPage = this.routeMainPage.clickNewRoute();

@@ -26,7 +26,6 @@ Cypress E2E test suite for validating Kong Gateway Manager's Service and Route l
 │   ├── fixtures/                         # Test data
 │   │   ├── basicFlow.json                    # Default Service/Route config
 │   │   ├── kongManager.json                  # Kong connection config
-│   │   ├── gatewayService.json               # Service-specific test data
 │   │   └── serviceParametersCheck.json       # Service creation page parameter validation data
 │   ├── support/
 │   │   ├── commands.js                       # Custom Cypress commands (Kong Admin API wrappers)
@@ -49,6 +48,7 @@ Cypress E2E test suite for validating Kong Gateway Manager's Service and Route l
 │   └── cypress.yaml                      # CI config (Chrome, Firefox, Edge)
 ├── issues/                              # Bug reports for Kong
 │   ├── kong-headers-regex-bug.md            # Route headers regex matching bug
+│   ├── kong-headers-regex-bug.png           # Screenshot for headers regex bug
 │   ├── kong-manager-service-FullURL-validation-bug.md  # Service URL validation bug
 │   └── kong-manager-FullURL-validation-bug.png          # Screenshot for URL validation bug
 ├── run-e2e.sh                            # One-click run script (Linux)
@@ -278,6 +278,7 @@ Defined in `cypress/support/commands.js`:
 | `cy.deleteRouteViaAPI(routeNameOrId)` | Delete a Route (204 on success) |
 | `cy.shouldRouteWorksCorrectly(url, options)` | Retry until Route returns 200 (3-min timeout) |
 | `cy.shouldRouteNotWorks(url, options)` | Retry until Route returns 404/426/5xx (3-min timeout) |
+| `cy.get(selector).getText()` | Child command; returns trimmed text of one element or array of texts for multiple elements |
 
 ### `shouldRouteWorksCorrectly` / `shouldRouteNotWorks` Options
 
@@ -364,10 +365,10 @@ Configured in `.github/workflows/cypress.yaml`:
 
 Bug reports are stored in the `issues/` directory.
 
-| Issue | File |
-|-------|------|
-| Route `headers` regex matching (`~` prefix) does not work under `traditional_compatible` router | [`kong-headers-regex-bug.md`](issues/kong-headers-regex-bug.md) |
-| Kong Manager UI does not validate invalid Service Full URL before submission | [`kong-manager-service-FullURL-validation-bug.md`](issues/kong-manager-service-FullURL-validation-bug.md) |
+| Issue | File | Screenshot |
+|-------|------|------------|
+| Route `headers` regex matching (`~` prefix) does not work under `traditional_compatible` router | [`kong-headers-regex-bug.md`](issues/kong-headers-regex-bug.md) | [`kong-headers-regex-bug.png`](issues/kong-headers-regex-bug.png) |
+| Kong Manager UI does not validate invalid Service Full URL before submission | [`kong-manager-service-FullURL-validation-bug.md`](issues/kong-manager-service-FullURL-validation-bug.md) | [`kong-manager-FullURL-validation-bug.png`](issues/kong-manager-FullURL-validation-bug.png) |
 
 ## Notes
 
