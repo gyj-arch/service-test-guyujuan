@@ -59,7 +59,7 @@ jobs:
           retention-days: 14 
 
       - name: Upload screenshots
-        if: failure()
+        if: steps.cypress.outcome == 'failure'
         uses: actions/upload-artifact@v6
         with:
           name: screenshots-${{ matrix.browser }}
@@ -68,10 +68,18 @@ jobs:
           retention-days: 14 
       
       - name: Upload videos
-        if: failure()
+        if: steps.cypress.outcome == 'failure'
         uses: actions/upload-artifact@v6
         with:
           name: videos-${{ matrix.browser }}
           path: cypress/videos
           if-no-files-found: ignore
           retention-days: 7 
+
+      - name: Check test results
+        if: always()
+        run: |
+          if [ "${{ steps.cypress.outcome }}" = "failure" ]; then
+            echo "Cypress tests failed"
+            exit 1
+          fi

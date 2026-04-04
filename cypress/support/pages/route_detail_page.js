@@ -24,10 +24,6 @@ class RouteDetailPage {
     getName() {
         return cy.get(this.nameValueSelector).getText();
     }
-
-    getMethods() {
-        return cy.get(this.methodsValueSelector)
-    }
     
     getGatewayService() {
         return cy.get(this.serviceValueSelector).getText();

@@ -263,8 +263,9 @@ describe('Verify Route Parameters Match', () => {
               url: serverURL + uniquePath,
               followRedirect: false,
               failOnStatusCode: false,
+              headers: { Host: myHost },
             }),
-            (response) => response.headers.Host !== myHost,
+            (response) => (response.body?.headers?.Host || response.body?.headers?.host) !== myHost,
             {
               timeout: 30000,
               delay: 1000,
@@ -272,7 +273,8 @@ describe('Verify Route Parameters Match', () => {
               errorMsg: `Expected host ${myHost} but not propagated in time`,
             }
           ).then((response) => {
-            expect(response.headers.Host).not.to.eq(myHost);
+            const upstreamHost = response.body?.headers?.Host || response.body?.headers?.host;
+            expect(upstreamHost).to.not.eq(myHost);
         });
     })
 
